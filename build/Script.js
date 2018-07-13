@@ -1,4 +1,4 @@
-define(["require", "exports", "./Sprite"], function (require, exports, Sprite_1) {
+define(["require", "exports", "./MathUtils", "./Sprite"], function (require, exports, MathUtils_1, Sprite_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Script {
@@ -7,6 +7,8 @@ define(["require", "exports", "./Sprite"], function (require, exports, Sprite_1)
             this._ctx = this._canvas.getContext('2d');
             this._jsonImg = new Array();
             this.loadJSON(path);
+            this._isCanvasDraw = true;
+            this._translatePointWithParent = [0, 0, 0];
         }
         loadJSON(path) {
             this._httpRequest = new XMLHttpRequest();
@@ -23,6 +25,7 @@ define(["require", "exports", "./Sprite"], function (require, exports, Sprite_1)
         }
         processData(data) {
             let idx = 0;
+            this._data = data;
             this._canvas.width = data.w;
             this._canvas.height = data.h;
             for (let asset of data.assets) {
@@ -49,15 +52,47 @@ define(["require", "exports", "./Sprite"], function (require, exports, Sprite_1)
         }
         drawImage(sprite) {
             this._ctx.save();
-            this._ctx.translate(sprite.pos[0], sprite.pos[1]);
+            this.setDrawParams(sprite);
+            this._ctx.drawImage(sprite.img, -sprite.ap[0], -sprite.ap[1]);
+            this.drawCanvas(this._isCanvasDraw);
+            this._ctx.restore();
+        }
+        setDrawParams(sprite) {
             this._ctx.globalAlpha = sprite.opacity / 100;
-            this._ctx.scale(sprite.scale[0] / 100, sprite.scale[1] / 100);
-            this._ctx.rotate(sprite.rotation * Math.PI / 180);
+            if (sprite.hasParent) {
+                this._translatePointWithParent = this.imgParentingSetup(sprite);
+                this._ctx.translate(this._translatePointWithParent[0], this._translatePointWithParent[1]);
+                this._rotationWithParent = sprite.rotation + sprite.parentRotation;
+                let sinA = MathUtils_1.MathUtils.sinDeg(sprite.parentRotation);
+                let cosA = MathUtils_1.MathUtils.cosDeg(sprite.parentRotation);
+                let X = (sprite.pos[0] * (sprite.parentScale[0] / 100)) - (sprite.parentAP[0] * (sprite.parentScale[0] / 100));
+                let Y = (sprite.pos[1] * (sprite.parentScale[1] / 100)) - (sprite.parentAP[1] * (sprite.parentScale[1] / 100));
+                this._ctx.translate(-this._translatePointWithParent[0] + sprite.parentPos[0], -this._translatePointWithParent[1] + sprite.parentPos[1]);
+                this._ctx.translate((X * cosA) - (Y * sinA), (Y * cosA) + (X * sinA));
+                this._ctx.rotate((this._rotationWithParent) * MathUtils_1.MathUtils.DEG_TO_RAD);
+                let scaleX = (sprite.parentScale[0] * sprite.scale[0]) / 100;
+                let scaleY = (sprite.parentScale[1] * sprite.scale[1]) / 100;
+                this._ctx.scale(scaleX / 100, scaleY / 100);
+            }
+            else {
+                this._ctx.translate(sprite.pos[0], sprite.pos[1]);
+                this._ctx.rotate(sprite.rotation * MathUtils_1.MathUtils.DEG_TO_RAD);
+                this._ctx.scale(sprite.scale[0] / 100, sprite.scale[1] / 100);
+            }
             if (sprite.skew) {
                 this._ctx.transform(1, sprite.skew / 70 * Math.abs(Math.cos(sprite.skewAxis * Math.PI / 180)), sprite.skew / 70 * Math.abs(Math.sin(sprite.skewAxis * Math.PI / 180)), 1, 0, 0);
             }
-            this._ctx.drawImage(sprite.img, -sprite.ap[0], -sprite.ap[1]);
-            this._ctx.restore();
+        }
+        drawCanvas(isDrawn) {
+            if (isDrawn) {
+                this._ctx.strokeStyle = "#FF0000";
+                this._ctx.strokeRect(0, 0, this._canvas.width, this._canvas.height);
+            }
+        }
+        imgParentingSetup(sprite) {
+            let _posWithParentX = sprite.parentPos[0] - ((sprite.parentAP[0] * (sprite.parentScale[0] / 100))) + (sprite.pos[0] * (sprite.parentScale[0] / 100));
+            let _posWithParentY = sprite.parentPos[1] - ((sprite.parentAP[1] * (sprite.parentScale[1] / 100))) + (sprite.pos[1] * (sprite.parentScale[1] / 100));
+            return [_posWithParentX, _posWithParentY];
         }
     }
     exports.Script = Script;
