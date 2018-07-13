@@ -1,8 +1,6 @@
 import { MathUtils } from './MathUtils';
 import { Sprite } from "./Sprite";
 
-
-
 export class Script
 {
     protected _httpRequest: XMLHttpRequest;
@@ -54,7 +52,7 @@ export class Script
         this._canvas.width = data.w;
         this._canvas.height = data.h;
 
-        for(let asset of data.assets)
+        for (let asset of data.assets)
         {
             this._jsonImg.push(new Sprite(data, idx));
             let img = document.createElement("img");
@@ -94,7 +92,7 @@ export class Script
         this._ctx.save();                                                   // Save the default state of the canvas
         this.setDrawParams(sprite);                                         // Setting up the transform parameters
         this._ctx.drawImage(sprite.img, -sprite.ap[0], -sprite.ap[1]);      // Drawing the image on the canvas according to the anchor point
-        this.drawCanvas(this._isCanvasDraw);
+        this.drawCanvas(this._isCanvasDraw);                                // Draw stroke for the canvas for debugging
         this._ctx.restore();                                                // Restore canvas to its starting state
     }
 
@@ -104,26 +102,26 @@ export class Script
         this._ctx.globalAlpha = sprite.opacity / 100;
 
         /* if sprite has parent */
-        if (sprite.hasParent)
+        if (sprite.parent)
         {
                 /* Positionning */
                 this._translatePointWithParent = this.imgParentingSetup(sprite);
                 this._ctx.translate(this._translatePointWithParent[0], this._translatePointWithParent[1]);    
 
                 /* Rotate */
-                this._rotationWithParent = sprite.rotation + sprite.parentRotation;
-                let sinA = MathUtils.sinDeg(sprite.parentRotation);
-                let cosA = MathUtils.cosDeg(sprite.parentRotation);
-                let X = (sprite.pos[0] * (sprite.parentScale[0] / 100)) - (sprite.parentAP[0] * (sprite.parentScale[0] /100));
-                let Y = (sprite.pos[1] * (sprite.parentScale[1] / 100)) - (sprite.parentAP[1] * (sprite.parentScale[1] /100));
+                this._rotationWithParent = sprite.rotation + sprite.parent.rotation;
+                let sinA = MathUtils.sinDeg(sprite.parent.rotation);
+                let cosA = MathUtils.cosDeg(sprite.parent.rotation);
+                let X = (sprite.pos[0] * (sprite.parent.scale[0] / 100)) - (sprite.parent.ap[0] * (sprite.parent.scale[0] /100));
+                let Y = (sprite.pos[1] * (sprite.parent.scale[1] / 100)) - (sprite.parent.ap[1] * (sprite.parent.scale[1] /100));
                
-                this._ctx.translate(-this._translatePointWithParent[0] + sprite.parentPos[0], -this._translatePointWithParent[1] + sprite.parentPos[1]);
+                this._ctx.translate(-this._translatePointWithParent[0] + sprite.parent.pos[0], -this._translatePointWithParent[1] + sprite.parent.pos[1]);
                 this._ctx.translate((X*cosA) - (Y*sinA), (Y*cosA) + (X*sinA));
                 this._ctx.rotate((this._rotationWithParent) * MathUtils.DEG_TO_RAD);
                 
                 /* Scale  */
-                let scaleX = (sprite.parentScale[0] * sprite.scale[0]) / 100;
-                let scaleY = (sprite.parentScale[1] * sprite.scale[1]) / 100;
+                let scaleX = (sprite.parent.scale[0] * sprite.scale[0]) / 100;
+                let scaleY = (sprite.parent.scale[1] * sprite.scale[1]) / 100;
                 this._ctx.scale(scaleX / 100, scaleY / 100);
         }
         else
@@ -145,7 +143,7 @@ export class Script
         }
     }
 
-    /* Draw the canvas for debugging */
+    /* Draw stroke for the canvas for debugging */
     protected drawCanvas(isDrawn : Boolean): void
     {
         if (isDrawn)
@@ -158,8 +156,8 @@ export class Script
     /* Getting the child coordinates from relative to the parent to relative to the canvas anchor point */
     protected imgParentingSetup(sprite: Sprite): number[]
     {
-        let _posWithParentX = sprite.parentPos[0] - ((sprite.parentAP[0] * (sprite.parentScale[0] /100))) + (sprite.pos[0] * (sprite.parentScale[0] / 100));
-        let _posWithParentY = sprite.parentPos[1] - ((sprite.parentAP[1] * (sprite.parentScale[1] /100))) + (sprite.pos[1] * (sprite.parentScale[1] / 100));
+        let _posWithParentX = sprite.parent.pos[0] - ((sprite.parent.ap[0] * (sprite.parent.scale[0] /100))) + (sprite.pos[0] * (sprite.parent.scale[0] / 100));
+        let _posWithParentY = sprite.parent.pos[1] - ((sprite.parent.ap[1] * (sprite.parent.scale[1] /100))) + (sprite.pos[1] * (sprite.parent.scale[1] / 100));
         return [_posWithParentX, _posWithParentY];
     }
 }

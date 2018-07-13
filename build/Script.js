@@ -59,19 +59,19 @@ define(["require", "exports", "./MathUtils", "./Sprite"], function (require, exp
         }
         setDrawParams(sprite) {
             this._ctx.globalAlpha = sprite.opacity / 100;
-            if (sprite.hasParent) {
+            if (sprite.parent) {
                 this._translatePointWithParent = this.imgParentingSetup(sprite);
                 this._ctx.translate(this._translatePointWithParent[0], this._translatePointWithParent[1]);
-                this._rotationWithParent = sprite.rotation + sprite.parentRotation;
-                let sinA = MathUtils_1.MathUtils.sinDeg(sprite.parentRotation);
-                let cosA = MathUtils_1.MathUtils.cosDeg(sprite.parentRotation);
-                let X = (sprite.pos[0] * (sprite.parentScale[0] / 100)) - (sprite.parentAP[0] * (sprite.parentScale[0] / 100));
-                let Y = (sprite.pos[1] * (sprite.parentScale[1] / 100)) - (sprite.parentAP[1] * (sprite.parentScale[1] / 100));
-                this._ctx.translate(-this._translatePointWithParent[0] + sprite.parentPos[0], -this._translatePointWithParent[1] + sprite.parentPos[1]);
+                this._rotationWithParent = sprite.rotation + sprite.parent.rotation;
+                let sinA = MathUtils_1.MathUtils.sinDeg(sprite.parent.rotation);
+                let cosA = MathUtils_1.MathUtils.cosDeg(sprite.parent.rotation);
+                let X = (sprite.pos[0] * (sprite.parent.scale[0] / 100)) - (sprite.parent.ap[0] * (sprite.parent.scale[0] / 100));
+                let Y = (sprite.pos[1] * (sprite.parent.scale[1] / 100)) - (sprite.parent.ap[1] * (sprite.parent.scale[1] / 100));
+                this._ctx.translate(-this._translatePointWithParent[0] + sprite.parent.pos[0], -this._translatePointWithParent[1] + sprite.parent.pos[1]);
                 this._ctx.translate((X * cosA) - (Y * sinA), (Y * cosA) + (X * sinA));
                 this._ctx.rotate((this._rotationWithParent) * MathUtils_1.MathUtils.DEG_TO_RAD);
-                let scaleX = (sprite.parentScale[0] * sprite.scale[0]) / 100;
-                let scaleY = (sprite.parentScale[1] * sprite.scale[1]) / 100;
+                let scaleX = (sprite.parent.scale[0] * sprite.scale[0]) / 100;
+                let scaleY = (sprite.parent.scale[1] * sprite.scale[1]) / 100;
                 this._ctx.scale(scaleX / 100, scaleY / 100);
             }
             else {
@@ -90,8 +90,8 @@ define(["require", "exports", "./MathUtils", "./Sprite"], function (require, exp
             }
         }
         imgParentingSetup(sprite) {
-            let _posWithParentX = sprite.parentPos[0] - ((sprite.parentAP[0] * (sprite.parentScale[0] / 100))) + (sprite.pos[0] * (sprite.parentScale[0] / 100));
-            let _posWithParentY = sprite.parentPos[1] - ((sprite.parentAP[1] * (sprite.parentScale[1] / 100))) + (sprite.pos[1] * (sprite.parentScale[1] / 100));
+            let _posWithParentX = sprite.parent.pos[0] - ((sprite.parent.ap[0] * (sprite.parent.scale[0] / 100))) + (sprite.pos[0] * (sprite.parent.scale[0] / 100));
+            let _posWithParentY = sprite.parent.pos[1] - ((sprite.parent.ap[1] * (sprite.parent.scale[1] / 100))) + (sprite.pos[1] * (sprite.parent.scale[1] / 100));
             return [_posWithParentX, _posWithParentY];
         }
     }

@@ -12,14 +12,11 @@ define(["require", "exports"], function (require, exports) {
             this.pos = data.layers[idx].ks.p.k;
             this.ap = data.layers[idx].ks.a.k;
             this.scale = data.layers[idx].ks.s.k;
-            this.parent = data.layers[idx].parent - 1;
-            if (this.parent >= 0) {
-                this.hasParent = true;
-                this.parentOpacity = data.layers[this.parent].ks.o.k;
-                this.parentRotation = data.layers[this.parent].ks.r.k;
-                this.parentPos = data.layers[this.parent].ks.p.k;
-                this.parentAP = data.layers[this.parent].ks.a.k;
-                this.parentScale = data.layers[this.parent].ks.s.k;
+            if (data.layers[idx].parent) {
+                this.parent = new Sprite(data, data.layers[idx].parent - 1);
+            }
+            else {
+                this.parent = null;
             }
             if (data.layers[idx].ef) {
                 this.skew = data.layers[idx].ef[0].ef[5].v.k;
@@ -31,18 +28,6 @@ define(["require", "exports"], function (require, exports) {
             }
             this.img = null;
             this.loaded = false;
-        }
-        getRotation(data, idx) {
-            return data.layers[idx].ks.r.k;
-        }
-        getPosition(data, idx) {
-            return data.layers[idx].ks.p.k;
-        }
-        getAnchorPoints(data, idx) {
-            return data.layers[idx].ks.a.k;
-        }
-        getScales(data, idx) {
-            return data.layers[idx].ks.s.k;
         }
     }
     exports.Sprite = Sprite;
