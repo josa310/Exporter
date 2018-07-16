@@ -29,7 +29,7 @@ export class Renderer
 
             this.setParams(layer);
 
-            this._context.drawImage(layer.asset.img, -layer.anchor.x, -layer.anchor.y);
+            this._context.drawImage(layer.asset.img, 0, 0);
             
             this._context.restore();
         }

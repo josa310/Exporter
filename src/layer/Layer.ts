@@ -117,11 +117,7 @@ export class Layer
         this._parentId = data.parent;
 
         this._opacity = data.ks.o.k / 100;
-        this._anchorPoint = new Vector2(data.ks.a.k[0], data.ks.a.k[1])
-        
-        this._localTransoform.translate(data.ks.p.k[0], data.ks.p.k[1]);
-        this._localTransoform.rotate(data.ks.r.k * MathUtils.DEG_TO_RAD);
-        this._localTransoform.scale(data.ks.s.k[0] / 100);
+        this._anchorPoint = new Vector2(-data.ks.a.k[0], -data.ks.a.k[1])
         
         // TODO better condition
         if (data.ef)        
@@ -129,5 +125,10 @@ export class Layer
             this.skew = data.ef[0].ef[5].v.k;
             this.skewAxis = data.ef[0].ef[6].v.k;
         }
+
+        this._localTransoform.translate(data.ks.p.k[0], data.ks.p.k[1]);
+        this._localTransoform.rotate(data.ks.r.k * MathUtils.DEG_TO_RAD);
+        this._localTransoform.scale(data.ks.s.k[0] / 100);
+        this._localTransoform.translate(this._anchorPoint.x, this._anchorPoint.y);
     }
 }

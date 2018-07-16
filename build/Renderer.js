@@ -14,7 +14,7 @@ define(["require", "exports", "./Loader"], function (require, exports, Loader_1)
                 this._context.save();
                 const layer = layers[idx];
                 this.setParams(layer);
-                this._context.drawImage(layer.asset.img, -layer.anchor.x, -layer.anchor.y);
+                this._context.drawImage(layer.asset.img, 0, 0);
                 this._context.restore();
             }
         }
