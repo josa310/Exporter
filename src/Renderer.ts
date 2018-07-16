@@ -1,3 +1,4 @@
+import { Loader } from './Loader';
 import { Layer } from "./layer/Layer";
 import { Transform } from "./layer/Transform";
 
@@ -10,12 +11,13 @@ export class Renderer
     {
         this._canvas = <HTMLCanvasElement>document.getElementById("canvas");
         this._context = this._canvas.getContext("2d");
-        this._canvas.width = 1920;
-        this._canvas.height = 1080;
     }
 
     public render(layers: Layer[]): void
     {
+        this._canvas.width = Loader.canvasWidth;
+        this._canvas.height = Loader.canvasHeight;
+
         this.clear();
 
         // Drawing the images in reverse order
@@ -40,6 +42,14 @@ export class Renderer
         this._context.translate(t.position.x, t.position.y);
         this._context.rotate(t.rotation);
         this._context.scale(t.scaling, t.scaling);
+
+        if (layer.skew)
+        {
+            this._context.transform(1, 
+                layer.skew / 26 * Math.abs(Math.cos(layer.skewAxis * Math.PI / 180)),       // "Horizontal skewing"
+                layer.skew / 26 * Math.abs(Math.sin(layer.skewAxis * Math.PI / 180)),       // "Vertical skewing"
+                1, 0, 0);
+        }
         
         this._context.globalAlpha = layer.opacity;
     }

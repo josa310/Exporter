@@ -3,6 +3,9 @@ import { Layer } from './layer/Layer';
 
 export class Loader
 {
+    public static canvasWidth: number;
+    public static canvasHeight: number;
+
     protected _data: any;
     protected _path: string;
     protected _cb: () => void;
@@ -43,6 +46,8 @@ export class Loader
     
     protected load(data: any): void
     {
+        Loader.canvasHeight = data.h;
+        Loader.canvasWidth = data.w;
         this.loadAssets(data);
         this.loadLayers(data);
     }
