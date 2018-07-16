@@ -26,6 +26,7 @@ export class Renderer
             this._context.save();
 
             const layer: Layer = layers[idx];
+            layer.updateAnimations();
 
             this.setParams(layer);
 

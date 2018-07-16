@@ -25,6 +25,7 @@ define(["require", "exports", "./layer/Asset", "./layer/Layer"], function (requi
         load(data) {
             Loader.canvasHeight = data.h;
             Loader.canvasWidth = data.w;
+            Layer_1.Layer.FPS = 1000 / data.fr;
             this.loadAssets(data);
             this.loadLayers(data);
         }

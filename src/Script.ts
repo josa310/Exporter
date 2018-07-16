@@ -19,6 +19,17 @@ export class Script
 
     protected onLoad(): void
     {
+        this.start();
+    }
+    
+    protected _timerId: number;
+    public start(): void
+    {
+        this._timerId = setInterval(() => this.update(), Layer.FPS);
+    }
+    
+    public update(): void
+    {
         this._renderer.render(this._layers);
     }
 }

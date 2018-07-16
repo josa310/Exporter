@@ -13,6 +13,7 @@ define(["require", "exports", "./Loader"], function (require, exports, Loader_1)
             for (let idx = layers.length - 1; idx >= 0; idx--) {
                 this._context.save();
                 const layer = layers[idx];
+                layer.updateAnimations();
                 this.setParams(layer);
                 this._context.drawImage(layer.asset.img, 0, 0);
                 this._context.restore();
