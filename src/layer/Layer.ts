@@ -20,7 +20,6 @@ export class Layer
     
     protected _parentId: number;
     
-    protected _localTransform: Transform2D;
     protected _globalTransform: Transform2D;
     
     protected _asset: Asset;
@@ -69,7 +68,6 @@ export class Layer
     constructor(data: any, asset: Asset)
     {
         this._asset = asset;
-        this._localTransform = new Transform2D();
         this._globalTransform = new Transform2D();
         this._animParams = new AnimParams();
         
@@ -133,7 +131,6 @@ export class Layer
         this.processAnchor(transitions.a);
         this.processOpacity(transitions.o);
 
-        this._animParams.transform = this._localTransform;
         this._animation.params = this._animParams;
         this._animation.start();
     }
@@ -150,7 +147,6 @@ export class Layer
         {
             // TODO: Implement animation handling
             this.extractAnim(data, AnimType.TRANSLATION);
-            this._localTransform.translate(0, 0);
         }
         else
         {
@@ -164,11 +160,10 @@ export class Layer
         if (data.a)
         {
             this.extractAnim(data, AnimType.ROTATION);
-            this._localTransform.rotate(0);
         }
         else
         {
-            this._localTransform.rotate(data.k * MathUtils.DEG_TO_RAD);
+            this.animParams.rotation = data.k * MathUtils.DEG_TO_RAD;
         }
     }
 
@@ -178,7 +173,6 @@ export class Layer
         {
             // TODO: Implement animation handling
             this.extractAnim(data, AnimType.SCALE);
-            this._localTransform.scale(1);
         }
         else
         {
@@ -193,12 +187,10 @@ export class Layer
         {
             // TODO: Implement animation handling
             this.extractAnim(data, AnimType.ANCHOR);
-            this._localTransform.translate(0, 0);
         }
         else
         {
             this._animParams.anchor = new Vector2(-data.k[0], -data.k[1]);
-            // this._localTransform.translate(this._animParams.anchor.x, this._animParams.anchor.y);
         }
     }
 

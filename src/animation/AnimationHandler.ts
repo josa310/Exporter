@@ -80,7 +80,7 @@ export class AnimationHandler
                     this._params.rotation = animation.getValue(Transitions.ROT) * MathUtils.DEG_TO_RAD;
                     break;
                     
-                    case AnimType.SCALE:
+                case AnimType.SCALE:
                     this._transformChanged = true;
                     this._params.scale.x = animation.getValue(Transitions.SCL_X) / 100;
                     this._params.scale.y = animation.getValue(Transitions.SCL_Y) / 100;
@@ -88,8 +88,8 @@ export class AnimationHandler
                     
                 case AnimType.ANCHOR:
                     this._transformChanged = true;
-                    this._params.scale.x = animation.getValue(Transitions.ANC_X);
-                    this._params.scale.y = animation.getValue(Transitions.ANC_Y);
+                    this._params.anchor.x = animation.getValue(Transitions.ANC_X);
+                    this._params.anchor.y = animation.getValue(Transitions.ANC_Y);
                     break;
                 
             }
@@ -100,10 +100,10 @@ export class AnimationHandler
     {
         let transform: Transform2D = this._params.transform;
         transform.identity();
-        transform.translate(this._params.translation.x, this._params.translation.x);
+        transform.translate(this._params.translation.x, this._params.translation.y);
         transform.rotate(this._params.rotation);
         // TODO: alter scale to enable non uniform scaling
         transform.scale(this._params.scale.x);
-        transform.translate(this._params.anchor.x, this._params.anchor.x);
+        transform.translate(this._params.anchor.x, this._params.anchor.y);
     }
 }
