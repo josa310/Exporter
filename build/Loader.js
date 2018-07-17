@@ -2,6 +2,9 @@ define(["require", "exports", "./layer/Asset", "./layer/Layer"], function (requi
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Loader {
+        get rootLayer() {
+            return this._rootLayer;
+        }
         constructor(path, layers, cb) {
             this._cb = cb;
             this._assets = {};
@@ -25,7 +28,7 @@ define(["require", "exports", "./layer/Asset", "./layer/Layer"], function (requi
         load(data) {
             Loader.canvasHeight = data.h;
             Loader.canvasWidth = data.w;
-            Layer_1.Layer.FPS = 1000 / 10;
+            Layer_1.Layer.FPS = 1000 / data.fr;
             this.loadAssets(data);
             this.loadLayers(data);
         }
@@ -47,27 +50,12 @@ define(["require", "exports", "./layer/Asset", "./layer/Layer"], function (requi
                 (layer.parentId ? this._layers[layer.parentId - 1] : root).addChild(layer);
             }
         }
-        updateLayerTransforms(layer) {
-            while (layer) {
-                layer.updateTransform();
-                if (!layer.updated && layer.firstChild) {
-                    layer.updated = true;
-                    layer = layer.firstChild;
-                }
-                else if (layer.next) {
-                    layer = layer.next;
-                }
-                else {
-                    layer = layer.parent;
-                }
-            }
-        }
         onLoad() {
             this._waitFor--;
             if (this._waitFor == 0) {
                 let root = new Layer_1.Layer(null, null);
                 this.orderLayers(root);
-                this.updateLayerTransforms(root);
+                this._rootLayer = root;
                 this._cb();
             }
         }

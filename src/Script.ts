@@ -5,9 +5,11 @@ import { Renderer } from './Renderer';
 // TODO: Write comments above the lines they are describing
 export class Script
 {
+    protected _root: Layer;
+    protected _layers: Layer[];
+
     protected _loader: Loader;
     protected _renderer: Renderer;
-    protected _layers: Layer[];
 
     constructor(path: string)
     {
@@ -19,6 +21,7 @@ export class Script
 
     protected onLoad(): void
     {
+        this._root = this._loader.rootLayer;
         this.start();
     }
     
@@ -30,6 +33,6 @@ export class Script
     
     public update(): void
     {
-        this._renderer.render(this._layers);
+        this._renderer.render(this._layers, this._root);
     }
 }

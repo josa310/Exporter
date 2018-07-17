@@ -11,8 +11,14 @@ export class Loader
     protected _cb: () => void;
     protected _waitFor: number;
     protected _layers: Layer[];
+    protected _rootLayer: Layer;
     protected _httpRequest: XMLHttpRequest;
     protected _assets: {[key: string]: Asset};
+
+    public get rootLayer(): Layer
+    {
+        return this._rootLayer;
+    }
 
     constructor(path: string, layers: Layer[], cb: () => void)
     {
@@ -48,7 +54,7 @@ export class Loader
     {
         Loader.canvasHeight = data.h;
         Loader.canvasWidth = data.w;
-        Layer.FPS = 1000 / 10;//data.fr;
+        Layer.FPS = 1000 / data.fr;
         this.loadAssets(data);
         this.loadLayers(data);
     }
@@ -81,28 +87,6 @@ export class Loader
         }
     }
 
-    protected updateLayerTransforms(layer: Layer): void
-    {
-        while (layer)
-        {
-            layer.updateTransform();
-            
-            if (!layer.updated && layer.firstChild)
-            {
-                layer.updated = true;
-                layer = layer.firstChild;
-            }
-            else if (layer.next)
-            {
-                layer = layer.next;
-            }
-            else
-            {
-                layer = layer.parent;
-            }
-        }
-    }
-
     protected onLoad(): void
     {
         this._waitFor--;
@@ -110,7 +94,7 @@ export class Loader
         {
             let root: Layer = new Layer(null, null);
             this.orderLayers(root);
-            this.updateLayerTransforms(root);
+            this._rootLayer = root;
             this._cb();
         }
     }

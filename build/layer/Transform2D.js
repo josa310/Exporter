@@ -13,6 +13,7 @@ define(["require", "exports", "./Matrix", "./Vector2"], function (require, expor
         }
         constructor() {
             super(3, 3);
+            this._dirty = true;
             this._matrix = new Matrix_1.Matrix(3, 3);
             this._matrix.identity();
             this.identity();
@@ -21,6 +22,7 @@ define(["require", "exports", "./Matrix", "./Vector2"], function (require, expor
             this._translation = new Vector2_1.Vector2();
             this._rotation = 0;
             this._scale = 1;
+            this.update();
         }
         identity() {
             super.identity();
@@ -57,6 +59,7 @@ define(["require", "exports", "./Matrix", "./Vector2"], function (require, expor
             this.dot(this._matrix, this);
         }
         update() {
+            this._dirty = true;
             this.updateScale();
             this.updateRotation();
             this.updateTranslation();

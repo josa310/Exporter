@@ -71,6 +71,7 @@ export class Layer
         this._asset = asset;
         this._localTransform = new Transform2D();
         this._globalTransform = new Transform2D();
+        this._animParams = new AnimParams();
         
         if (data == null)
         {
@@ -103,7 +104,7 @@ export class Layer
             this._globalTransform.identity();
         }
         
-        this._globalTransform.dot(this._localTransform, this._globalTransform);
+        this._globalTransform.dot(this._animParams.transform, this._globalTransform);
     }
     
     protected init(data: any): void
@@ -116,7 +117,6 @@ export class Layer
         this._id = data.ind;
         
         this._parentId = data.parent;
-        this._animParams = new AnimParams();
         this._animation = new AnimationHandler();
         
         // TODO better condition
@@ -154,7 +154,8 @@ export class Layer
         }
         else
         {
-            this._localTransform.translate(data.k[0], data.k[1]);
+            // this._localTransform.translate(data.k[0], data.k[1]);
+            this._animParams.translation = new Vector2(data.k[0], data.k[1]);
         }
     }
 
@@ -181,7 +182,8 @@ export class Layer
         }
         else
         {
-            this._localTransform.scale(data.k[0] / 100);
+            // this._localTransform.scale(data.k[0] / 100);
+            this._animParams.scale = new Vector2(data.k[0] / 100, data.k[1] / 100);
         }
     }
 
@@ -196,7 +198,7 @@ export class Layer
         else
         {
             this._animParams.anchor = new Vector2(-data.k[0], -data.k[1]);
-            this._localTransform.translate(this._animParams.anchor.x, this._animParams.anchor.y);
+            // this._localTransform.translate(this._animParams.anchor.x, this._animParams.anchor.y);
         }
     }
 

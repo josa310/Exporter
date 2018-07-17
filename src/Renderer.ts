@@ -14,25 +14,27 @@ export class Renderer
         this._context = this._canvas.getContext("2d");
     }
 
-    public render(layers: Layer[]): void
+    public render(layers: Layer[], root: Layer): void
     {
         this._canvas.width = Loader.canvasWidth;
         this._canvas.height = Loader.canvasHeight;
 
+        this.updateLayerTransforms(root);
+        root.updated = false;
+        
         this.clear();
 
         // Drawing the images in reverse order
         for (let idx: number = layers.length - 1; idx >= 0; idx--)       
         {
             this._context.save();
+            let layer: Layer = layers[idx];
 
-            const layer: Layer = layers[idx];
+            layer.updated = false;
             layer.updateAnimations();
-            const p: AnimParams = layer.animParams;
-
             this.setParams(layer);
 
-            this._context.drawImage(layer.asset.img, p.anchor.x, p.anchor.y);
+            this._context.drawImage(layer.asset.img, 0, 0);
             
             this._context.restore();
         }
@@ -40,11 +42,11 @@ export class Renderer
     
     protected setParams(layer: Layer): void
     {
-        const p: AnimParams = layer.animParams;
+        const t: Transform2D = layer.transform;
 
-        this._context.translate(p.translation.x, p.translation.y);
-        this._context.rotate(p.rotation);
-        this._context.scale(p.scale.x, p.scale.y);
+        this._context.translate(t.position.x, t.position.y);
+        this._context.rotate(t.rotation);
+        this._context.scale(t.scaling, t.scaling);
 
         if (layer.skew)
         {
@@ -54,7 +56,7 @@ export class Renderer
                 1, 0, 0);
         }
         
-        this._context.globalAlpha = p.opacity;
+        this._context.globalAlpha = layer.animParams.opacity;
     }
 
     protected clear(): void
@@ -67,5 +69,27 @@ export class Renderer
     {
         this._context.strokeStyle = "#FF0000";
         this._context.strokeRect(0, 0, this._canvas.width, this._canvas.height);
+    }
+
+    protected updateLayerTransforms(layer: Layer): void
+    {
+        while (layer)
+        {
+            layer.updateTransform();
+            
+            if (!layer.updated && layer.firstChild)
+            {
+                layer.updated = true;
+                layer = layer.firstChild;
+            }
+            else if (layer.next)
+            {
+                layer = layer.next;
+            }
+            else
+            {
+                layer = layer.parent;
+            }
+        }
     }
 }

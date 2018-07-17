@@ -7,6 +7,7 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             this._asset = asset;
             this._localTransform = new Transform2D_1.Transform2D();
             this._globalTransform = new Transform2D_1.Transform2D();
+            this._animParams = new AnimParams_1.AnimParams();
             if (data == null) {
                 return;
             }
@@ -48,7 +49,7 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             else {
                 this._globalTransform.identity();
             }
-            this._globalTransform.dot(this._localTransform, this._globalTransform);
+            this._globalTransform.dot(this._animParams.transform, this._globalTransform);
         }
         init(data) {
             this._next = null;
@@ -57,7 +58,6 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             this._child = null;
             this._id = data.ind;
             this._parentId = data.parent;
-            this._animParams = new AnimParams_1.AnimParams();
             this._animation = new AnimationHandler_1.AnimationHandler();
             if (data.ef) {
                 this.skew = data.ef[0].ef[5].v.k;
@@ -83,7 +83,7 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
                 this._localTransform.translate(0, 0);
             }
             else {
-                this._localTransform.translate(data.k[0], data.k[1]);
+                this._animParams.translation = new Vector2_1.Vector2(data.k[0], data.k[1]);
             }
         }
         processRotation(data) {
@@ -101,7 +101,7 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
                 this._localTransform.scale(1);
             }
             else {
-                this._localTransform.scale(data.k[0] / 100);
+                this._animParams.scale = new Vector2_1.Vector2(data.k[0] / 100, data.k[1] / 100);
             }
         }
         processAnchor(data) {
@@ -111,7 +111,6 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             }
             else {
                 this._animParams.anchor = new Vector2_1.Vector2(-data.k[0], -data.k[1]);
-                this._localTransform.translate(this._animParams.anchor.x, this._animParams.anchor.y);
             }
         }
         processOpacity(data) {

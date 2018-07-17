@@ -3,6 +3,7 @@ import { Vector2 } from "./Vector2";
 
 export class Transform2D extends Matrix
 {
+    protected _dirty: boolean;
     protected _matrix: Matrix;
 
     protected _scale: number;
@@ -28,6 +29,7 @@ export class Transform2D extends Matrix
     {
         super(3, 3);
 
+        this._dirty = true;
         this._matrix = new Matrix(3, 3);
         this._matrix.identity();
         this.identity();
@@ -38,6 +40,7 @@ export class Transform2D extends Matrix
         this._translation = new Vector2();
         this._rotation = 0;
         this._scale = 1;
+        this.update();
     }
 
     public identity(): void
@@ -97,6 +100,7 @@ export class Transform2D extends Matrix
 
     protected update(): void
     {
+        this._dirty = true;
         this.updateScale();
         this.updateRotation();
         this.updateTranslation();
