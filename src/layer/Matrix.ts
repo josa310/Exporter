@@ -63,6 +63,11 @@ export class Matrix
 
     public copy(m: Matrix): void
     {
+        if (!m)
+        {
+            return;
+        }
+
         if (m._m != this._m || m._n != this._n)
         {
             this._m = m._m;

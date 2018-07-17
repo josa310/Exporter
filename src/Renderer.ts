@@ -1,6 +1,7 @@
 import { Loader } from './Loader';
 import { Layer } from "./layer/Layer";
-import { Transform } from "./layer/Transform";
+import { Transform2D } from "./layer/Transform2D";
+import { AnimParams } from './animation/AnimParams';
 
 export class Renderer
 {
@@ -27,10 +28,11 @@ export class Renderer
 
             const layer: Layer = layers[idx];
             layer.updateAnimations();
+            const p: AnimParams = layer.animParams;
 
             this.setParams(layer);
 
-            this._context.drawImage(layer.asset.img, 0, 0);
+            this._context.drawImage(layer.asset.img, p.anchor.x, p.anchor.y);
             
             this._context.restore();
         }
@@ -38,11 +40,11 @@ export class Renderer
     
     protected setParams(layer: Layer): void
     {
-        const t: Transform = layer.transform;
-    
-        this._context.translate(t.position.x, t.position.y);
-        this._context.rotate(t.rotation);
-        this._context.scale(t.scaling, t.scaling);
+        const p: AnimParams = layer.animParams;
+
+        this._context.translate(p.translation.x, p.translation.y);
+        this._context.rotate(p.rotation);
+        this._context.scale(p.scale.x, p.scale.y);
 
         if (layer.skew)
         {
@@ -52,7 +54,7 @@ export class Renderer
                 1, 0, 0);
         }
         
-        this._context.globalAlpha = layer.opacity;
+        this._context.globalAlpha = p.opacity;
     }
 
     protected clear(): void

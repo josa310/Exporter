@@ -1,8 +1,10 @@
 import { Asset } from './Asset';
-import { Transform } from './Transform';
+import { Transform2D } from './Transform2D';
 import { Vector2 } from './Vector2';
 import { MathUtils } from '../MathUtils';
 import { Animation, AnimType, Transitions } from '../animation/Animation';
+import { AnimParams } from '../animation/AnimParams';
+import { AnimationHandler } from '../animation/AnimationHandler';
 
 export class Layer
 {
@@ -18,14 +20,18 @@ export class Layer
     
     protected _parentId: number;
     
-    protected _localTransform: Transform;
-    protected _globalTransform: Transform;
+    protected _localTransform: Transform2D;
+    protected _globalTransform: Transform2D;
     
     protected _asset: Asset;
-    protected _opacity: number;
-    public _anchorPoint: Vector2;
 
-    protected _animations: Animation[];
+    protected _animParams: AnimParams;
+    protected _animation: AnimationHandler;
+
+    public get animParams(): AnimParams
+    {
+        return this._animParams;
+    }
 
     public get firstChild(): Layer
     {
@@ -47,7 +53,7 @@ export class Layer
         return this._parent;
     }
 
-    public get transform(): Transform
+    public get transform(): Transform2D
     {
         return this._globalTransform;
     }
@@ -57,33 +63,23 @@ export class Layer
         return this._asset;
     }
 
-    public get anchor(): Vector2
-    {
-        return this._anchorPoint;
-    }
-
-    public get opacity(): number
-    {
-        return this._opacity;
-    }
-
     public skew: number;
     public skewAxis: number;
 
     constructor(data: any, asset: Asset)
     {
         this._asset = asset;
-        this._localTransform = new Transform();
-        this._globalTransform = new Transform();
-
+        this._localTransform = new Transform2D();
+        this._globalTransform = new Transform2D();
+        
         if (data == null)
         {
             return;
         }
-
+        
         this.init(data);
     }
-
+    
     public addChild(child: Layer): void
     {
         if (this._child)
@@ -91,11 +87,11 @@ export class Layer
             this._child._prev = child;
             child._next = this._child;
         }
-
+        
         this._child = child;
         this._child._parent = this;
     }
-
+    
     public updateTransform(): void
     {
         if (this._parent)
@@ -106,21 +102,22 @@ export class Layer
         {
             this._globalTransform.identity();
         }
-
+        
         this._globalTransform.dot(this._localTransform, this._globalTransform);
     }
-
+    
     protected init(data: any): void
     {
         this._next = null;
         this._prev = null;
         this._parent = null;
         this._child = null;
-
+        
         this._id = data.ind;
-
+        
         this._parentId = data.parent;
-        this._animations = new Array<Animation>();
+        this._animParams = new AnimParams();
+        this._animation = new AnimationHandler();
         
         // TODO better condition
         if (data.ef)        
@@ -128,7 +125,7 @@ export class Layer
             this.skew = data.ef[0].ef[5].v.k;
             this.skewAxis = data.ef[0].ef[6].v.k;
         }
-
+        
         const transitions = data.ks;
         this.processTranslation(transitions.p);
         this.processRotation(transitions.r);
@@ -136,35 +133,15 @@ export class Layer
         this.processAnchor(transitions.a);
         this.processOpacity(transitions.o);
 
-        this.startAnimations();
-    }
-
-    protected startAnimations(): void
-    {
-        for (let animation of this._animations)
-        {
-            animation.start();
-        }
+        this._animParams.transform = this._localTransform;
+        this._animation.params = this._animParams;
+        this._animation.start();
     }
 
     public updateAnimations(): void
     {
-        for (let animation of this._animations)
-        {
-            if (!animation.update())
-            {
-                animation.start();
-            }
-
-            switch (animation.type)
-            {
-                case AnimType.OPACITY:
-                {
-                    this._opacity = animation.getValue(Transitions.OPCT) / 100;
-                    // console.log(this._opacity);
-                }
-            }
-        }
+        this._animation.update();
+        this._animParams.copy(this._animation.params);
     }
         
     protected processTranslation(data: any): void
@@ -172,6 +149,7 @@ export class Layer
         if (data.a)
         {
             // TODO: Implement animation handling
+            this.extractAnim(data, AnimType.TRANSLATION);
             this._localTransform.translate(0, 0);
         }
         else
@@ -184,7 +162,7 @@ export class Layer
     {
         if (data.a)
         {
-            // TODO: Implement animation handling
+            this.extractAnim(data, AnimType.ROTATION);
             this._localTransform.rotate(0);
         }
         else
@@ -198,6 +176,7 @@ export class Layer
         if (data.a)
         {
             // TODO: Implement animation handling
+            this.extractAnim(data, AnimType.SCALE);
             this._localTransform.scale(1);
         }
         else
@@ -211,12 +190,13 @@ export class Layer
         if (data.a)
         {
             // TODO: Implement animation handling
+            this.extractAnim(data, AnimType.ANCHOR);
             this._localTransform.translate(0, 0);
         }
         else
         {
-            this._anchorPoint = new Vector2(-data.k[0], -data.k[1]);
-            this._localTransform.translate(this._anchorPoint.x, this._anchorPoint.y);
+            this._animParams.anchor = new Vector2(-data.k[0], -data.k[1]);
+            this._localTransform.translate(this._animParams.anchor.x, this._animParams.anchor.y);
         }
     }
 
@@ -224,16 +204,23 @@ export class Layer
     {
         if (data.a)
         {
-            // TODO: Implement better animation handling
-            const frameCnt: number = data.k[1].t - data.k[0].t;
-            let animation: Animation = new Animation(frameCnt, data.k[0].s, data.k[0].e, AnimType.OPACITY);
-            this._animations.push(animation);
+            this.extractAnim(data, AnimType.OPACITY);
         }
         else
         {
-            this._opacity = data.k / 100;
+            this._animParams.opacity = data.k / 100;
         }
     }
 
+    protected extractAnim(data: any, type: AnimType): void
+    {
+        let cnt: number = data.k.length;
+        for (let idx: number = 0; idx < cnt - 1; idx++)
+        {
+            let frameCnt: number = data.k[idx+1].t - data.k[idx].t;
+            let animation: Animation = new Animation(frameCnt, data.k[idx].s, data.k[idx].e, type);
+            this._animation.add(animation);
+        }
+    }
 
 }

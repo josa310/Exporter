@@ -38,6 +38,9 @@ define(["require", "exports"], function (require, exports) {
             return this;
         }
         copy(m) {
+            if (!m) {
+                return;
+            }
             if (m._m != this._m || m._n != this._n) {
                 this._m = m._m;
                 this._n = m._n;

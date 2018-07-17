@@ -67,4 +67,16 @@ export class Vector2
         this._nX = this._x / this._magnitude;
         this._nY = this._y / this._magnitude;
     }
+
+    public copy(v: Vector2): void
+    {
+        if (!v)
+        {
+            return;
+        }
+        
+        this._x = v._x;
+        this._y = v._y;
+        this.update();
+    }
 }

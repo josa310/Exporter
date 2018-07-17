@@ -48,7 +48,7 @@ export class Loader
     {
         Loader.canvasHeight = data.h;
         Loader.canvasWidth = data.w;
-        Layer.FPS = 1000 / data.fr;
+        Layer.FPS = 1000 / 10;//data.fr;
         this.loadAssets(data);
         this.loadLayers(data);
     }

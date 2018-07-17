@@ -14,20 +14,21 @@ define(["require", "exports", "./Loader"], function (require, exports, Loader_1)
                 this._context.save();
                 const layer = layers[idx];
                 layer.updateAnimations();
+                const p = layer.animParams;
                 this.setParams(layer);
-                this._context.drawImage(layer.asset.img, 0, 0);
+                this._context.drawImage(layer.asset.img, p.anchor.x, p.anchor.y);
                 this._context.restore();
             }
         }
         setParams(layer) {
-            const t = layer.transform;
-            this._context.translate(t.position.x, t.position.y);
-            this._context.rotate(t.rotation);
-            this._context.scale(t.scaling, t.scaling);
+            const p = layer.animParams;
+            this._context.translate(p.translation.x, p.translation.y);
+            this._context.rotate(p.rotation);
+            this._context.scale(p.scale.x, p.scale.y);
             if (layer.skew) {
                 this._context.transform(1, layer.skew / 26 * Math.abs(Math.cos(layer.skewAxis * Math.PI / 180)), layer.skew / 26 * Math.abs(Math.sin(layer.skewAxis * Math.PI / 180)), 1, 0, 0);
             }
-            this._context.globalAlpha = layer.opacity;
+            this._context.globalAlpha = p.opacity;
         }
         clear() {
             this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);

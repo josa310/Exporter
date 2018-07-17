@@ -1,7 +1,7 @@
 define(["require", "exports", "./Matrix", "./Vector2"], function (require, exports, Matrix_1, Vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class Transform extends Matrix_1.Matrix {
+    class Transform2D extends Matrix_1.Matrix {
         get rotation() {
             return this._rotation;
         }
@@ -32,7 +32,7 @@ define(["require", "exports", "./Matrix", "./Vector2"], function (require, expor
         }
         dot(m, retVal) {
             super.dot(m, retVal);
-            if (retVal instanceof Transform) {
+            if (retVal instanceof Transform2D) {
                 retVal.update();
             }
         }
@@ -72,6 +72,6 @@ define(["require", "exports", "./Matrix", "./Vector2"], function (require, expor
             this._rotation = Math.atan2(this._data[1][0], this._data[1][1]);
         }
     }
-    exports.Transform = Transform;
+    exports.Transform2D = Transform2D;
 });
-//# sourceMappingURL=Transform.js.map
+//# sourceMappingURL=Transform2D.js.map

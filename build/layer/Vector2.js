@@ -38,6 +38,14 @@ define(["require", "exports"], function (require, exports) {
             this._nX = this._x / this._magnitude;
             this._nY = this._y / this._magnitude;
         }
+        copy(v) {
+            if (!v) {
+                return;
+            }
+            this._x = v._x;
+            this._y = v._y;
+            this.update();
+        }
     }
     exports.Vector2 = Vector2;
 });

@@ -1,16 +1,19 @@
-define(["require", "exports", "./Transform", "./Vector2", "../MathUtils", "../animation/Animation"], function (require, exports, Transform_1, Vector2_1, MathUtils_1, Animation_1) {
+define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../animation/Animation", "../animation/AnimParams", "../animation/AnimationHandler"], function (require, exports, Transform2D_1, Vector2_1, MathUtils_1, Animation_1, AnimParams_1, AnimationHandler_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Layer {
         constructor(data, asset) {
             this.updated = false;
             this._asset = asset;
-            this._localTransform = new Transform_1.Transform();
-            this._globalTransform = new Transform_1.Transform();
+            this._localTransform = new Transform2D_1.Transform2D();
+            this._globalTransform = new Transform2D_1.Transform2D();
             if (data == null) {
                 return;
             }
             this.init(data);
+        }
+        get animParams() {
+            return this._animParams;
         }
         get firstChild() {
             return this._child;
@@ -29,12 +32,6 @@ define(["require", "exports", "./Transform", "./Vector2", "../MathUtils", "../an
         }
         get asset() {
             return this._asset;
-        }
-        get anchor() {
-            return this._anchorPoint;
-        }
-        get opacity() {
-            return this._opacity;
         }
         addChild(child) {
             if (this._child) {
@@ -60,7 +57,8 @@ define(["require", "exports", "./Transform", "./Vector2", "../MathUtils", "../an
             this._child = null;
             this._id = data.ind;
             this._parentId = data.parent;
-            this._animations = new Array();
+            this._animParams = new AnimParams_1.AnimParams();
+            this._animation = new AnimationHandler_1.AnimationHandler();
             if (data.ef) {
                 this.skew = data.ef[0].ef[5].v.k;
                 this.skewAxis = data.ef[0].ef[6].v.k;
@@ -71,28 +69,17 @@ define(["require", "exports", "./Transform", "./Vector2", "../MathUtils", "../an
             this.processScale(transitions.s);
             this.processAnchor(transitions.a);
             this.processOpacity(transitions.o);
-            this.startAnimations();
-        }
-        startAnimations() {
-            for (let animation of this._animations) {
-                animation.start();
-            }
+            this._animParams.transform = this._localTransform;
+            this._animation.params = this._animParams;
+            this._animation.start();
         }
         updateAnimations() {
-            for (let animation of this._animations) {
-                if (!animation.update()) {
-                    animation.start();
-                }
-                switch (animation.type) {
-                    case Animation_1.AnimType.OPACITY:
-                        {
-                            this._opacity = animation.getValue(Animation_1.Transitions.OPCT) / 100;
-                        }
-                }
-            }
+            this._animation.update();
+            this._animParams.copy(this._animation.params);
         }
         processTranslation(data) {
             if (data.a) {
+                this.extractAnim(data, Animation_1.AnimType.TRANSLATION);
                 this._localTransform.translate(0, 0);
             }
             else {
@@ -101,6 +88,7 @@ define(["require", "exports", "./Transform", "./Vector2", "../MathUtils", "../an
         }
         processRotation(data) {
             if (data.a) {
+                this.extractAnim(data, Animation_1.AnimType.ROTATION);
                 this._localTransform.rotate(0);
             }
             else {
@@ -109,6 +97,7 @@ define(["require", "exports", "./Transform", "./Vector2", "../MathUtils", "../an
         }
         processScale(data) {
             if (data.a) {
+                this.extractAnim(data, Animation_1.AnimType.SCALE);
                 this._localTransform.scale(1);
             }
             else {
@@ -117,21 +106,28 @@ define(["require", "exports", "./Transform", "./Vector2", "../MathUtils", "../an
         }
         processAnchor(data) {
             if (data.a) {
+                this.extractAnim(data, Animation_1.AnimType.ANCHOR);
                 this._localTransform.translate(0, 0);
             }
             else {
-                this._anchorPoint = new Vector2_1.Vector2(-data.k[0], -data.k[1]);
-                this._localTransform.translate(this._anchorPoint.x, this._anchorPoint.y);
+                this._animParams.anchor = new Vector2_1.Vector2(-data.k[0], -data.k[1]);
+                this._localTransform.translate(this._animParams.anchor.x, this._animParams.anchor.y);
             }
         }
         processOpacity(data) {
             if (data.a) {
-                const frameCnt = data.k[1].t - data.k[0].t;
-                let animation = new Animation_1.Animation(frameCnt, data.k[0].s, data.k[0].e, Animation_1.AnimType.OPACITY);
-                this._animations.push(animation);
+                this.extractAnim(data, Animation_1.AnimType.OPACITY);
             }
             else {
-                this._opacity = data.k / 100;
+                this._animParams.opacity = data.k / 100;
+            }
+        }
+        extractAnim(data, type) {
+            let cnt = data.k.length;
+            for (let idx = 0; idx < cnt - 1; idx++) {
+                let frameCnt = data.k[idx + 1].t - data.k[idx].t;
+                let animation = new Animation_1.Animation(frameCnt, data.k[idx].s, data.k[idx].e, type);
+                this._animation.add(animation);
             }
         }
     }

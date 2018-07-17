@@ -1,7 +1,7 @@
 import { Matrix } from "./Matrix";
 import { Vector2 } from "./Vector2";
 
-export class Transform extends Matrix
+export class Transform2D extends Matrix
 {
     protected _matrix: Matrix;
 
@@ -24,11 +24,11 @@ export class Transform extends Matrix
         return this._translation;
     }
 
-    constructor(m: number = 3, n: number = 3)
+    constructor()
     {
-        super(m, n);
+        super(3, 3);
 
-        this._matrix = new Matrix(m, n);
+        this._matrix = new Matrix(3, 3);
         this._matrix.identity();
         this.identity();
     }
@@ -57,9 +57,9 @@ export class Transform extends Matrix
     {
         super.dot(m, retVal);
 
-        if (retVal instanceof Transform)
+        if (retVal instanceof Transform2D)
         {
-            (retVal as Transform).update();
+            (retVal as Transform2D).update();
         }
     }
 
