@@ -54,8 +54,8 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
                         break;
                     case Animation_1.AnimType.ANCHOR:
                         this._transformChanged = true;
-                        this._params.scale.x = animation.getValue(Animation_2.Transitions.ANC_X);
-                        this._params.scale.y = animation.getValue(Animation_2.Transitions.ANC_Y);
+                        this._params.anchor.x = -animation.getValue(Animation_2.Transitions.ANC_X);
+                        this._params.anchor.y = -animation.getValue(Animation_2.Transitions.ANC_Y);
                         break;
                 }
             }
@@ -63,10 +63,10 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
         updateTransform() {
             let transform = this._params.transform;
             transform.identity();
-            transform.translate(this._params.translation.x, this._params.translation.x);
+            transform.translate(this._params.translation.x, this._params.translation.y);
             transform.rotate(this._params.rotation);
             transform.scale(this._params.scale.x);
-            transform.translate(this._params.anchor.x, this._params.anchor.x);
+            transform.translate(this._params.anchor.x, this._params.anchor.y);
         }
     }
     exports.AnimationHandler = AnimationHandler;

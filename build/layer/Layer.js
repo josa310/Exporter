@@ -5,7 +5,6 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
         constructor(data, asset) {
             this.updated = false;
             this._asset = asset;
-            this._localTransform = new Transform2D_1.Transform2D();
             this._globalTransform = new Transform2D_1.Transform2D();
             this._animParams = new AnimParams_1.AnimParams();
             if (data == null) {
@@ -69,7 +68,6 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             this.processScale(transitions.s);
             this.processAnchor(transitions.a);
             this.processOpacity(transitions.o);
-            this._animParams.transform = this._localTransform;
             this._animation.params = this._animParams;
             this._animation.start();
         }
@@ -80,7 +78,6 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
         processTranslation(data) {
             if (data.a) {
                 this.extractAnim(data, Animation_1.AnimType.TRANSLATION);
-                this._localTransform.translate(0, 0);
             }
             else {
                 this._animParams.translation = new Vector2_1.Vector2(data.k[0], data.k[1]);
@@ -89,16 +86,14 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
         processRotation(data) {
             if (data.a) {
                 this.extractAnim(data, Animation_1.AnimType.ROTATION);
-                this._localTransform.rotate(0);
             }
             else {
-                this._localTransform.rotate(data.k * MathUtils_1.MathUtils.DEG_TO_RAD);
+                this.animParams.rotation = data.k * MathUtils_1.MathUtils.DEG_TO_RAD;
             }
         }
         processScale(data) {
             if (data.a) {
                 this.extractAnim(data, Animation_1.AnimType.SCALE);
-                this._localTransform.scale(1);
             }
             else {
                 this._animParams.scale = new Vector2_1.Vector2(data.k[0] / 100, data.k[1] / 100);
@@ -107,7 +102,6 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
         processAnchor(data) {
             if (data.a) {
                 this.extractAnim(data, Animation_1.AnimType.ANCHOR);
-                this._localTransform.translate(0, 0);
             }
             else {
                 this._animParams.anchor = new Vector2_1.Vector2(-data.k[0], -data.k[1]);

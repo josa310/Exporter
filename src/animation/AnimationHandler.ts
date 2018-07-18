@@ -88,8 +88,8 @@ export class AnimationHandler
                     
                 case AnimType.ANCHOR:
                     this._transformChanged = true;
-                    this._params.anchor.x = animation.getValue(Transitions.ANC_X);
-                    this._params.anchor.y = animation.getValue(Transitions.ANC_Y);
+                    this._params.anchor.x = -animation.getValue(Transitions.ANC_X);
+                    this._params.anchor.y = -animation.getValue(Transitions.ANC_Y);
                     break;
                 
             }
