@@ -17,6 +17,9 @@ export class AnimationHandler
     protected _animations: Animation[];
     protected _transformChanged: boolean;
 
+    protected static OBJ_CNT: number = 0;
+    public _id: number;
+
     public get params(): AnimParams
     {
         return this._params;
@@ -25,8 +28,8 @@ export class AnimationHandler
     public set params(value: AnimParams)
     {
         this._params.copy(value);
-        this._startParams.copy(value);
         this.updateTransform();
+        this._startParams.copy(this.params)
     }
 
     constructor()
@@ -38,6 +41,8 @@ export class AnimationHandler
         this._params = new AnimParams();
         this._startParams = new AnimParams();
         this._animations = new Array<Animation>();
+
+        this._id = AnimationHandler.OBJ_CNT++;
     }
 
     public add(newAnim: Animation): void
@@ -56,15 +61,24 @@ export class AnimationHandler
             {
                 if (newAnim.startFrame < anim.startFrame)
                 {
+                    if (anim.prev)
+                    {
+                        newAnim.prev = anim.prev;
+                        newAnim.prev.next = newAnim;
+                    }
+                    else
+                    {
+                        this._animList = newAnim;
+                    }
+                    
                     newAnim.next = anim;
                     anim.prev = newAnim;
-                    this._animList = newAnim;
 
                     return;
                 }
                 else if (newAnim.startFrame == anim.startFrame)
                 {
-                    anim.sibling = newAnim;
+                    newAnim.sibling = anim;
                     newAnim.next = anim.next;
                     newAnim.prev = anim.prev;
                     if (newAnim.next)
@@ -74,6 +88,10 @@ export class AnimationHandler
                     if (newAnim.prev)
                     {
                         newAnim.prev.next = newAnim;
+                    }
+                    else
+                    {
+                        this._animList = newAnim;
                     }
 
                     return;
@@ -124,7 +142,7 @@ export class AnimationHandler
 
         this._isPlaying = this._frameIdx < this._frameCnt;
 
-        return true;
+        return this._isPlaying;
     }
 
     protected startAnimsOfFrame(): void

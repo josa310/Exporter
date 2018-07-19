@@ -6,14 +6,14 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             this.updated = false;
             this._asset = asset;
             this._globalTransform = new Transform2D_1.Transform2D();
-            this._animParams = new AnimParams_1.AnimParams();
+            this._params = new AnimParams_1.AnimParams();
             if (data == null) {
                 return;
             }
             this.init(data);
         }
         get animParams() {
-            return this._animParams;
+            return this._params;
         }
         get firstChild() {
             return this._child;
@@ -48,7 +48,7 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             else {
                 this._globalTransform.identity();
             }
-            this._globalTransform.dot(this._animParams.transform, this._globalTransform);
+            this._globalTransform.dot(this._params.transform, this._globalTransform);
         }
         init(data) {
             this._next = null;
@@ -68,24 +68,30 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             this.processScale(transitions.s);
             this.processAnchor(transitions.a);
             this.processOpacity(transitions.o);
-            this._animation.params = this._animParams;
+            this._animation.params = this._params;
+            this._params.copy(this._animation.params);
+        }
+        startAnim() {
             this._animation.start();
         }
-        updateAnimations() {
-            this._animation.update();
-            this._animParams.copy(this._animation.params);
+        updateAnimation() {
+            let retVal = this._animation.update();
+            this._params.copy(this._animation.params);
+            return retVal;
         }
         processTranslation(data) {
             if (data.a) {
                 this.extractAnim(data, Animation_1.AnimType.TRANSLATION);
+                this._params.translation = new Vector2_1.Vector2(data.k[0].s[0], data.k[0].s[1]);
             }
             else {
-                this._animParams.translation = new Vector2_1.Vector2(data.k[0], data.k[1]);
+                this._params.translation = new Vector2_1.Vector2(data.k[0], data.k[1]);
             }
         }
         processRotation(data) {
             if (data.a) {
                 this.extractAnim(data, Animation_1.AnimType.ROTATION);
+                this._params.rotation = data.k[0].s[0] * MathUtils_1.MathUtils.DEG_TO_RAD;
             }
             else {
                 this.animParams.rotation = data.k * MathUtils_1.MathUtils.DEG_TO_RAD;
@@ -94,32 +100,34 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
         processScale(data) {
             if (data.a) {
                 this.extractAnim(data, Animation_1.AnimType.SCALE);
+                this._params.scale = new Vector2_1.Vector2(data.k[0].s[0] / 100, data.k[0].s[1] / 100);
             }
             else {
-                this._animParams.scale = new Vector2_1.Vector2(data.k[0] / 100, data.k[1] / 100);
+                this._params.scale = new Vector2_1.Vector2(data.k[0] / 100, data.k[1] / 100);
             }
         }
         processAnchor(data) {
             if (data.a) {
                 this.extractAnim(data, Animation_1.AnimType.ANCHOR);
+                this._params.anchor = new Vector2_1.Vector2(-data.k[0].s[0], -data.k[0].s[1]);
             }
             else {
-                this._animParams.anchor = new Vector2_1.Vector2(-data.k[0], -data.k[1]);
+                this._params.anchor = new Vector2_1.Vector2(-data.k[0], -data.k[1]);
             }
         }
         processOpacity(data) {
             if (data.a) {
                 this.extractAnim(data, Animation_1.AnimType.OPACITY);
+                this._params.opacity = data.k[0].s[0];
             }
             else {
-                this._animParams.opacity = data.k / 100;
+                this._params.opacity = data.k / 100;
             }
         }
         extractAnim(data, type) {
             let cnt = data.k.length;
             for (let idx = 0; idx < cnt - 1; idx++) {
-                let frameCnt = data.k[idx + 1].t - data.k[idx].t;
-                let animation = new Animation_1.Animation(frameCnt, data.k[idx].s, data.k[idx].e, type);
+                let animation = new Animation_1.Animation(data.k[idx].t, data.k[idx + 1].t, data.k[idx].s, data.k[idx].e, type);
                 this._animation.add(animation);
             }
         }

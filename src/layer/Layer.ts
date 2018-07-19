@@ -24,12 +24,12 @@ export class Layer
     
     protected _asset: Asset;
 
-    protected _animParams: AnimParams;
+    protected _params: AnimParams;
     protected _animation: AnimationHandler;
 
     public get animParams(): AnimParams
     {
-        return this._animParams;
+        return this._params;
     }
 
     public get firstChild(): Layer
@@ -69,7 +69,7 @@ export class Layer
     {
         this._asset = asset;
         this._globalTransform = new Transform2D();
-        this._animParams = new AnimParams();
+        this._params = new AnimParams();
         
         if (data == null)
         {
@@ -102,7 +102,7 @@ export class Layer
             this._globalTransform.identity();
         }
         
-        this._globalTransform.dot(this._animParams.transform, this._globalTransform);
+        this._globalTransform.dot(this._params.transform, this._globalTransform);
     }
     
     protected init(data: any): void
@@ -131,8 +131,8 @@ export class Layer
         this.processAnchor(transitions.a);
         this.processOpacity(transitions.o);
 
-        this._animation.params = this._animParams;
-        this._animation.updateTransform();
+        this._animation.params = this._params;
+        this._params.copy(this._animation.params);
     }
     
     public startAnim(): void
@@ -143,7 +143,7 @@ export class Layer
     public updateAnimation(): boolean
     {
         let retVal: boolean = this._animation.update();
-        this._animParams.copy(this._animation.params);
+        this._params.copy(this._animation.params);
 
         return retVal;
     }
@@ -154,12 +154,12 @@ export class Layer
         {
             // TODO: Implement animation handling
             this.extractAnim(data, AnimType.TRANSLATION);
-            this._animParams.translation = new Vector2(data.k[0].s[0], data.k[0].s[1]);
+            this._params.translation = new Vector2(data.k[0].s[0], data.k[0].s[1]);
         }
         else
         {
             // this._localTransform.translate(data.k[0], data.k[1]);
-            this._animParams.translation = new Vector2(data.k[0], data.k[1]);
+            this._params.translation = new Vector2(data.k[0], data.k[1]);
         }
     }
 
@@ -168,6 +168,8 @@ export class Layer
         if (data.a)
         {
             this.extractAnim(data, AnimType.ROTATION);
+            this._params.rotation = data.k[0].s[0] * MathUtils.DEG_TO_RAD;
+
         }
         else
         {
@@ -181,11 +183,13 @@ export class Layer
         {
             // TODO: Implement animation handling
             this.extractAnim(data, AnimType.SCALE);
+            this._params.scale = new Vector2(data.k[0].s[0] / 100, data.k[0].s[1] / 100);
+
         }
         else
         {
             // this._localTransform.scale(data.k[0] / 100);
-            this._animParams.scale = new Vector2(data.k[0] / 100, data.k[1] / 100);
+            this._params.scale = new Vector2(data.k[0] / 100, data.k[1] / 100);
         }
     }
 
@@ -195,10 +199,12 @@ export class Layer
         {
             // TODO: Implement animation handling
             this.extractAnim(data, AnimType.ANCHOR);
+            this._params.anchor = new Vector2(-data.k[0].s[0], -data.k[0].s[1]);
+
         }
         else
         {
-            this._animParams.anchor = new Vector2(-data.k[0], -data.k[1]);
+            this._params.anchor = new Vector2(-data.k[0], -data.k[1]);
         }
     }
 
@@ -207,10 +213,12 @@ export class Layer
         if (data.a)
         {
             this.extractAnim(data, AnimType.OPACITY);
+            this._params.opacity = data.k[0].s[0];
+
         }
         else
         {
-            this._animParams.opacity = data.k / 100;
+            this._params.opacity = data.k / 100;
         }
     }
 

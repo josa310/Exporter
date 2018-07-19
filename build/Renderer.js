@@ -12,14 +12,20 @@ define(["require", "exports", "./Loader"], function (require, exports, Loader_1)
             this.updateLayerTransforms(root);
             root.updated = false;
             this.clear();
+            let alive = false;
             for (let idx = layers.length - 1; idx >= 0; idx--) {
                 this._context.save();
                 let layer = layers[idx];
                 layer.updated = false;
-                layer.updateAnimations();
+                alive = (layer.updateAnimation() || alive);
                 this.setParams(layer);
                 this._context.drawImage(layer.asset.img, 0, 0);
                 this._context.restore();
+            }
+            if (!alive) {
+                for (let layer of layers) {
+                    layer.startAnim();
+                }
             }
         }
         setParams(layer) {

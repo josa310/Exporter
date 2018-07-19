@@ -24,14 +24,39 @@ define(["require", "exports"], function (require, exports) {
         get type() {
             return this._type;
         }
+        get sibling() {
+            return this._sibling;
+        }
         get next() {
             return this._next;
         }
-        constructor(frameCnt, startValues, endValues, type) {
+        get prev() {
+            return this._prev;
+        }
+        set sibling(value) {
+            this._sibling = value;
+        }
+        set next(value) {
+            this._next = value;
+        }
+        set prev(value) {
+            this._prev = value;
+        }
+        get startFrame() {
+            return this._startFrame;
+        }
+        get endFrame() {
+            return this._startFrame + this._frameCnt;
+        }
+        get isPalying() {
+            return this._isPlaying;
+        }
+        constructor(startFrame, endFrame, startValues, endValues, type) {
             this._type = type;
-            this._frameCnt = frameCnt;
             this._endValues = endValues;
             this._startValues = startValues;
+            this._startFrame = startFrame;
+            this._frameCnt = endFrame - startFrame;
             this._currentValues = new Array(this._startValues.length);
             for (let idx = 0; idx < this._startValues.length; idx++) {
                 this._currentValues[idx] = 0;
