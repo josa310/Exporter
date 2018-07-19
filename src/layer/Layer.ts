@@ -132,13 +132,20 @@ export class Layer
         this.processOpacity(transitions.o);
 
         this._animation.params = this._animParams;
+        this._animation.updateTransform();
+    }
+    
+    public startAnim(): void
+    {
         this._animation.start();
     }
 
-    public updateAnimations(): void
+    public updateAnimation(): boolean
     {
-        this._animation.update();
+        let retVal: boolean = this._animation.update();
         this._animParams.copy(this._animation.params);
+
+        return retVal;
     }
         
     protected processTranslation(data: any): void
@@ -147,6 +154,7 @@ export class Layer
         {
             // TODO: Implement animation handling
             this.extractAnim(data, AnimType.TRANSLATION);
+            this._animParams.translation = new Vector2(data.k[0].s[0], data.k[0].s[1]);
         }
         else
         {
@@ -211,8 +219,7 @@ export class Layer
         let cnt: number = data.k.length;
         for (let idx: number = 0; idx < cnt - 1; idx++)
         {
-            let frameCnt: number = data.k[idx+1].t - data.k[idx].t;
-            let animation: Animation = new Animation(frameCnt, data.k[idx].s, data.k[idx].e, type);
+            let animation: Animation = new Animation(data.k[idx].t, data.k[idx+1].t, data.k[idx].s, data.k[idx].e, type);
             this._animation.add(animation);
         }
     }

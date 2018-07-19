@@ -1,4 +1,3 @@
-
 export enum Transitions
 {
     ROT = 0,
@@ -22,34 +21,80 @@ export enum AnimType
 
 export class Animation
 {
-    // TODO: Loop
+    protected _next: Animation;
+    protected _prev: Animation;
+    protected _sibling: Animation;
 
     protected _alpha: number;
     protected _frameCnt: number;
     protected _frameIdx: number;
+    protected _startFrame: number;
     protected _isPlaying: boolean;
     protected _endValues: number[];
     protected _startValues: number[];
     protected _currentValues: number[];
     protected _type: AnimType;
-    protected _next: Animation;
 
     public get type(): AnimType
     {
         return this._type;
     }
 
+    public get sibling(): Animation
+    {
+        return this._sibling;
+    }
+    
     public get next(): Animation
     {
         return this._next;
     }
+    
+    public get prev(): Animation
+    {
+        return this._prev;
+    }
 
-    constructor(frameCnt: number, startValues: number[], endValues: number[], type: AnimType)
+    public set sibling(value: Animation)
+    {
+        this._sibling = value;
+    }
+    
+    public set next(value: Animation)
+    {
+        this._next = value;
+    }
+    
+    public set prev(value: Animation)
+    {
+        this._prev = value;
+    }
+
+    public get startFrame(): number
+    {
+        return this._startFrame
+    }
+
+    public get endFrame(): number
+    {
+        return this._startFrame + this._frameCnt;
+    }
+
+    public get isPalying(): boolean
+    {
+        return this._isPlaying;
+    }
+
+    constructor(startFrame: number, endFrame: number, startValues: number[], endValues: number[], type: AnimType)
     {
         this._type = type;
-        this._frameCnt = frameCnt;
+
         this._endValues = endValues;
         this._startValues = startValues;
+
+        this._startFrame = startFrame;
+        this._frameCnt = endFrame - startFrame;
+
         this._currentValues = new Array<number>(this._startValues.length);
 
         for (let idx: number = 0; idx < this._startValues.length; idx++)

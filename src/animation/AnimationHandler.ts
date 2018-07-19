@@ -7,7 +7,13 @@ import { Transform2D } from "../layer/Transform2D";
 
 export class AnimationHandler
 {
+    protected _frameCnt: number;
+    protected _frameIdx: number;
+    protected _isPlaying: boolean;
     protected _params: AnimParams;
+    protected _startParams: AnimParams;
+    protected _animList: Animation;
+    protected _nextAnim: Animation;
     protected _animations: Animation[];
     protected _transformChanged: boolean;
 
@@ -19,48 +25,132 @@ export class AnimationHandler
     public set params(value: AnimParams)
     {
         this._params.copy(value);
+        this._startParams.copy(value);
         this.updateTransform();
     }
 
     constructor()
     {
+        this._frameCnt = 0;
+        this._frameIdx = 0;
+        this._isPlaying = false;
         this._transformChanged;
         this._params = new AnimParams();
+        this._startParams = new AnimParams();
         this._animations = new Array<Animation>();
     }
 
-    public add(animation: Animation): void
+    public add(newAnim: Animation): void
     {
-        this._animations.push(animation);
+        this._animations.push(newAnim);
+
+        if (this._frameCnt < newAnim.endFrame)
+        {
+            this._frameCnt = newAnim.endFrame;
+        }
+
+        if (this._animList)
+        {
+            let anim: Animation = this._animList;
+            while (true)
+            {
+                if (newAnim.startFrame < anim.startFrame)
+                {
+                    newAnim.next = anim;
+                    anim.prev = newAnim;
+                    this._animList = newAnim;
+
+                    return;
+                }
+                else if (newAnim.startFrame == anim.startFrame)
+                {
+                    anim.sibling = newAnim;
+                    newAnim.next = anim.next;
+                    newAnim.prev = anim.prev;
+                    if (newAnim.next)
+                    {
+                        newAnim.next.prev = newAnim;
+                    }
+                    if (newAnim.prev)
+                    {
+                        newAnim.prev.next = newAnim;
+                    }
+
+                    return;
+                }
+                else if (!anim.next)
+                {
+                    anim.next = newAnim;
+                    newAnim.prev = anim;
+
+                    return;
+                }
+
+                anim = anim.next;
+            }
+        }
+        else
+        {
+            this._animList = newAnim;
+        }
     }
 
     public start(): void
     {
-        for (let animation of this._animations)
-        {
-            animation.start();
-        }
+        this._frameIdx = 0;
+        this._isPlaying = true;
+        this._nextAnim = this._animList;
+        this._params.copy(this._startParams);
     }
 
-    public update(): void
+    public update(): boolean
     {
-        this._transformChanged = false;
+        if (!this._isPlaying)
+        {
+            return false;
+        }
+
+        this.startAnimsOfFrame();
         
+        this._transformChanged = false;
         this.updateValues();
 
         if (this._transformChanged)
         {
             this.updateTransform();
         }
+
+        this._frameIdx++;
+
+        this._isPlaying = this._frameIdx < this._frameCnt;
+
+        return true;
+    }
+
+    protected startAnimsOfFrame(): void
+    {
+        if (!this._nextAnim || this._nextAnim.startFrame != this._frameIdx)
+        {
+            return;
+        }
+
+        let animation: Animation = this._nextAnim;
+        while (animation)
+        {
+            animation.start();
+            animation = animation.sibling;
+        }
+
+        this._nextAnim = this._nextAnim.next;
     }
 
     protected updateValues(): void
     {
-        for (let animation of this._animations)
+        for  (let animation of this._animations)
         {
             if (!animation.update())
             {
-                animation.start();
+                continue;
             }
 
             switch (animation.type)
@@ -96,7 +186,7 @@ export class AnimationHandler
         }
     }
     
-    protected updateTransform(): void
+    public updateTransform(): void
     {
         let transform: Transform2D = this._params.transform;
         transform.identity();

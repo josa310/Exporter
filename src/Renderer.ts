@@ -23,7 +23,8 @@ export class Renderer
         root.updated = false;
         
         this.clear();
-
+        
+        let alive: boolean = false;
         // Drawing the images in reverse order
         for (let idx: number = layers.length - 1; idx >= 0; idx--)       
         {
@@ -31,12 +32,20 @@ export class Renderer
             let layer: Layer = layers[idx];
 
             layer.updated = false;
-            layer.updateAnimations();
+            alive = (layer.updateAnimation() || alive);
             this.setParams(layer);
 
             this._context.drawImage(layer.asset.img, 0, 0);
             
             this._context.restore();
+        }
+
+        if (!alive)
+        {
+            for (let layer of layers)
+            {
+                layer.startAnim();
+            }
         }
     }
     
