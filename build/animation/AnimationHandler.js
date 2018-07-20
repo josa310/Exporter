@@ -1,4 +1,4 @@
-define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../MathUtils"], function (require, exports, Animation_1, AnimParams_1, Animation_2, MathUtils_1) {
+define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../MathUtils", "../list/LinkedList"], function (require, exports, Animation_1, AnimParams_1, Animation_2, MathUtils_1, LinkedList_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AnimationHandler {
@@ -10,6 +10,7 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             this._params = new AnimParams_1.AnimParams();
             this._startParams = new AnimParams_1.AnimParams();
             this._animations = new Array();
+            this._animList = new LinkedList_1.LinkedList();
             this._id = AnimationHandler.OBJ_CNT++;
         }
         get params() {
@@ -25,52 +26,35 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             if (this._frameCnt < newAnim.endFrame) {
                 this._frameCnt = newAnim.endFrame;
             }
-            if (this._animList) {
-                let anim = this._animList;
-                while (true) {
-                    if (newAnim.startFrame < anim.startFrame) {
-                        if (anim.prev) {
-                            newAnim.prev = anim.prev;
-                            newAnim.prev.next = newAnim;
-                        }
-                        else {
-                            this._animList = newAnim;
-                        }
-                        newAnim.next = anim;
-                        anim.prev = newAnim;
-                        return;
-                    }
-                    else if (newAnim.startFrame == anim.startFrame) {
-                        newAnim.sibling = anim;
-                        newAnim.next = anim.next;
-                        newAnim.prev = anim.prev;
-                        if (newAnim.next) {
-                            newAnim.next.prev = newAnim;
-                        }
-                        if (newAnim.prev) {
-                            newAnim.prev.next = newAnim;
-                        }
-                        else {
-                            this._animList = newAnim;
-                        }
-                        return;
-                    }
-                    else if (!anim.next) {
-                        anim.next = newAnim;
-                        newAnim.prev = anim;
-                        return;
-                    }
-                    anim = anim.next;
+            if (this._animList.length == 0) {
+                let newList = new LinkedList_1.LinkedList();
+                newList.linkAfter(newAnim);
+                this._animList.linkAfter(newList);
+                return;
+            }
+            let anims = this._animList.current;
+            while (anims) {
+                let anim = anims.current;
+                if (newAnim.startFrame < anim.startFrame) {
+                    let newList = new LinkedList_1.LinkedList();
+                    newList.linkAfter(newAnim);
+                    this._animList.linkBefore(newList);
+                    return;
                 }
+                else if (newAnim.startFrame == anim.startFrame) {
+                    anims.linkAfter(newAnim);
+                    return;
+                }
+                anims = this._animList.next;
             }
-            else {
-                this._animList = newAnim;
-            }
+            let newList = new LinkedList_1.LinkedList();
+            newList.linkAfter(newAnim);
+            this._animList.linkAfter(newList);
         }
         start() {
             this._frameIdx = 0;
             this._isPlaying = true;
-            this._nextAnim = this._animList;
+            this._nextAnimList = this._animList.getByIdx(0);
             this._params.copy(this._startParams);
         }
         update() {
@@ -88,15 +72,15 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             return this._isPlaying;
         }
         startAnimsOfFrame() {
-            if (!this._nextAnim || this._nextAnim.startFrame != this._frameIdx) {
+            if (!this._nextAnimList || this._nextAnimList.first.startFrame != this._frameIdx) {
                 return;
             }
-            let animation = this._nextAnim;
+            let animation = this._nextAnimList.first;
             while (animation) {
                 animation.start();
-                animation = animation.sibling;
+                animation = this._nextAnimList.next;
             }
-            this._nextAnim = this._nextAnim.next;
+            this._nextAnimList = this._animList.next;
         }
         updateValues() {
             for (let animation of this._animations) {

@@ -1,9 +1,11 @@
+import { Link } from './../list/Link';
 import { AnimType } from "./Animation";
 import { Animation } from "./Animation";
 import { AnimParams } from "./AnimParams";
 import { Transitions } from "./Animation";
 import { MathUtils } from "../MathUtils";
 import { Transform2D } from "../layer/Transform2D";
+import { LinkedList } from '../list/LinkedList';
 
 export class AnimationHandler
 {
@@ -12,8 +14,8 @@ export class AnimationHandler
     protected _isPlaying: boolean;
     protected _params: AnimParams;
     protected _startParams: AnimParams;
-    protected _animList: Animation;
-    protected _nextAnim: Animation;
+    protected _animList: LinkedList<LinkedList<Animation>>;
+    protected _nextAnimList: LinkedList<Animation>;
     protected _animations: Animation[];
     protected _transformChanged: boolean;
 
@@ -41,6 +43,7 @@ export class AnimationHandler
         this._params = new AnimParams();
         this._startParams = new AnimParams();
         this._animations = new Array<Animation>();
+        this._animList = new LinkedList<LinkedList<Animation>>();
 
         this._id = AnimationHandler.OBJ_CNT++;
     }
@@ -53,71 +56,49 @@ export class AnimationHandler
         {
             this._frameCnt = newAnim.endFrame;
         }
-
-        if (this._animList)
+        
+        if (this._animList.length == 0)
         {
-            let anim: Animation = this._animList;
-            while (true)
+            let newList: LinkedList<Animation> = new LinkedList<Animation>();
+            newList.linkAfter(newAnim);
+            this._animList.linkAfter(newList);
+
+            return;
+        }
+        
+        let anims: LinkedList<Animation> = this._animList.current;
+        while (anims)
+        {
+            let anim: Animation = anims.current;
+
+            if (newAnim.startFrame < anim.startFrame)
             {
-                if (newAnim.startFrame < anim.startFrame)
-                {
-                    if (anim.prev)
-                    {
-                        newAnim.prev = anim.prev;
-                        newAnim.prev.next = newAnim;
-                    }
-                    else
-                    {
-                        this._animList = newAnim;
-                    }
-                    
-                    newAnim.next = anim;
-                    anim.prev = newAnim;
+                let newList: LinkedList<Animation> = new LinkedList<Animation>();
+                newList.linkAfter(newAnim);
+                this._animList.linkBefore(newList);
 
-                    return;
-                }
-                else if (newAnim.startFrame == anim.startFrame)
-                {
-                    newAnim.sibling = anim;
-                    newAnim.next = anim.next;
-                    newAnim.prev = anim.prev;
-                    if (newAnim.next)
-                    {
-                        newAnim.next.prev = newAnim;
-                    }
-                    if (newAnim.prev)
-                    {
-                        newAnim.prev.next = newAnim;
-                    }
-                    else
-                    {
-                        this._animList = newAnim;
-                    }
-
-                    return;
-                }
-                else if (!anim.next)
-                {
-                    anim.next = newAnim;
-                    newAnim.prev = anim;
-
-                    return;
-                }
-
-                anim = anim.next;
+                return;
             }
+            else if (newAnim.startFrame == anim.startFrame)
+            {
+                anims.linkAfter(newAnim);
+                
+                return;
+            }
+
+            anims = this._animList.next;
         }
-        else
-        {
-            this._animList = newAnim;
-        }
+
+        let newList: LinkedList<Animation> = new LinkedList<Animation>();
+        newList.linkAfter(newAnim);
+        this._animList.linkAfter(newList);
     }
 
     public start(): void
     {
         this._frameIdx = 0;
         this._isPlaying = true;
-        this._nextAnim = this._animList;
+        this._nextAnimList = this._animList.getByIdx(0);
         this._params.copy(this._startParams);
     }
 
@@ -147,19 +128,19 @@ export class AnimationHandler
 
     protected startAnimsOfFrame(): void
     {
-        if (!this._nextAnim || this._nextAnim.startFrame != this._frameIdx)
+        if (!this._nextAnimList || this._nextAnimList.first.startFrame != this._frameIdx)
         {
             return;
         }
 
-        let animation: Animation = this._nextAnim;
+        let animation: Animation = this._nextAnimList.first;
         while (animation)
         {
             animation.start();
-            animation = animation.sibling;
+            animation = this._nextAnimList.next;
         }
 
-        this._nextAnim = this._nextAnim.next;
+        this._nextAnimList = this._animList.next;
     }
 
     protected updateValues(): void

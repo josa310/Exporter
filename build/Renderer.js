@@ -19,7 +19,8 @@ define(["require", "exports", "./Loader"], function (require, exports, Loader_1)
                 layer.updated = false;
                 alive = (layer.updateAnimation() || alive);
                 this.setParams(layer);
-                this._context.drawImage(layer.asset.img, 0, 0);
+                if (layer.asset)
+                    this._context.drawImage(layer.asset.img, 0, 0);
                 this._context.restore();
             }
             if (!alive) {
