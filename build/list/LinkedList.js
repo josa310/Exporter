@@ -101,7 +101,7 @@ define(["require", "exports", "./Link"], function (require, exports, Link_1) {
             this._length++;
         }
         checkIdx(idx) {
-            if (idx < 0 || idx > this._length) {
+            if (idx < 0 || idx > this._length || this._length == 0) {
                 return false;
             }
             while (this._lastIdx < idx) {

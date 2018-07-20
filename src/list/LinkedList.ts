@@ -161,7 +161,7 @@ export class LinkedList<T>
 
     protected checkIdx(idx: number): boolean
     {
-        if (idx < 0 || idx > this._length)
+        if (idx < 0 || idx > this._length || this._length == 0)
         {
             return false;
         }

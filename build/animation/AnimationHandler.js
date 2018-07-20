@@ -56,6 +56,7 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             this._isPlaying = true;
             this._nextAnimList = this._animList.getByIdx(0);
             this._params.copy(this._startParams);
+            console.log(this._animList.length);
         }
         update() {
             if (!this._isPlaying) {

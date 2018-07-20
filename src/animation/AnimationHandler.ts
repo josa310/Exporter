@@ -98,8 +98,9 @@ export class AnimationHandler
     {
         this._frameIdx = 0;
         this._isPlaying = true;
-        this._nextAnimList = this._animList.getByIdx(0);
+        // this._nextAnimList = this._animList.getByIdx(0);
         this._params.copy(this._startParams);
+        console.log(this._animList.length);
     }
 
     public update(): boolean
