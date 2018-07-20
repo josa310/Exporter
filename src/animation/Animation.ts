@@ -117,6 +117,9 @@ export class Animation
     {
         this._isPlaying = true;
         this._frameIdx = 0;
+        // if (this._type == 1)
+            // console.log(this._startFrame, this._type, this._startValues, this._endValues);
+
     }
     
     public stop(): void

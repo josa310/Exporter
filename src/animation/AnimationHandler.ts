@@ -15,8 +15,8 @@ export class AnimationHandler
     protected _params: AnimParams;
     protected _startParams: AnimParams;
     protected _animList: LinkedList<LinkedList<Animation>>;
-    protected _nextAnimList: LinkedList<Animation>;
-    protected _animations: Animation[];
+    protected _animations: LinkedList<Animation>;
+    protected _runningAnimations: Animation[];
     protected _transformChanged: boolean;
 
     protected static OBJ_CNT: number = 0;
@@ -42,7 +42,7 @@ export class AnimationHandler
         this._transformChanged;
         this._params = new AnimParams();
         this._startParams = new AnimParams();
-        this._animations = new Array<Animation>();
+        this._runningAnimations = new Array<Animation>();
         this._animList = new LinkedList<LinkedList<Animation>>();
 
         this._id = AnimationHandler.OBJ_CNT++;
@@ -50,13 +50,13 @@ export class AnimationHandler
 
     public add(newAnim: Animation): void
     {
-        this._animations.push(newAnim);
+        this._runningAnimations.push(newAnim);
 
         if (this._frameCnt < newAnim.endFrame)
         {
             this._frameCnt = newAnim.endFrame;
         }
-        
+
         if (this._animList.length == 0)
         {
             let newList: LinkedList<Animation> = new LinkedList<Animation>();
@@ -66,7 +66,7 @@ export class AnimationHandler
             return;
         }
         
-        let anims: LinkedList<Animation> = this._animList.current;
+        let anims: LinkedList<Animation> = this._animList.first;
         while (anims)
         {
             let anim: Animation = anims.current;
@@ -98,9 +98,8 @@ export class AnimationHandler
     {
         this._frameIdx = 0;
         this._isPlaying = true;
-        // this._nextAnimList = this._animList.getByIdx(0);
+        this._animations = this._animList.first;
         this._params.copy(this._startParams);
-        console.log(this._animList.length);
     }
 
     public update(): boolean
@@ -129,24 +128,24 @@ export class AnimationHandler
 
     protected startAnimsOfFrame(): void
     {
-        if (!this._nextAnimList || this._nextAnimList.first.startFrame != this._frameIdx)
+        if (!this._animations || this._animations.first.startFrame != this._frameIdx)
         {
             return;
         }
 
-        let animation: Animation = this._nextAnimList.first;
+        let animation: Animation = this._animations.first;
         while (animation)
         {
             animation.start();
-            animation = this._nextAnimList.next;
+            animation = this._animations.next;
         }
 
-        this._nextAnimList = this._animList.next;
+        this._animations = this._animList.next;
     }
 
     protected updateValues(): void
     {
-        for  (let animation of this._animations)
+        for  (let animation of this._runningAnimations)
         {
             if (!animation.update())
             {
@@ -181,7 +180,6 @@ export class AnimationHandler
                     this._params.anchor.x = -animation.getValue(Transitions.ANC_X);
                     this._params.anchor.y = -animation.getValue(Transitions.ANC_Y);
                     break;
-                
             }
         }
     }

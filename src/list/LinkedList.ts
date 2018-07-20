@@ -43,6 +43,7 @@ export class LinkedList<T>
         if (this._first)
         {
             this._current = this._first;
+            this._lastIdx = 0;
             return this._current.data;
         }
 
@@ -75,7 +76,7 @@ export class LinkedList<T>
             return this.prev;
         }
 
-        if (this.checkIdx(idx))
+        if (this.checkIdx(idx) && this._length)
         {
             return this._current.data;
         }
@@ -126,7 +127,7 @@ export class LinkedList<T>
 
     public linkBefore(item: T, idx: number = this._lastIdx): void
     {
-        if (this.checkIdx(idx))
+        if (!this.checkIdx(idx))
         {
             return;
         }
@@ -161,7 +162,7 @@ export class LinkedList<T>
 
     protected checkIdx(idx: number): boolean
     {
-        if (idx < 0 || idx > this._length || this._length == 0)
+        if (idx < 0 || idx > this._length)
         {
             return false;
         }

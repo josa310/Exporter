@@ -31,6 +31,7 @@ define(["require", "exports", "./Link"], function (require, exports, Link_1) {
         get first() {
             if (this._first) {
                 this._current = this._first;
+                this._lastIdx = 0;
                 return this._current.data;
             }
             return null;
@@ -45,7 +46,7 @@ define(["require", "exports", "./Link"], function (require, exports, Link_1) {
             else if (idx == (this._lastIdx - 1)) {
                 return this.prev;
             }
-            if (this.checkIdx(idx)) {
+            if (this.checkIdx(idx) && this._length) {
                 return this._current.data;
             }
             return null;
@@ -78,7 +79,7 @@ define(["require", "exports", "./Link"], function (require, exports, Link_1) {
             this._length++;
         }
         linkBefore(item, idx = this._lastIdx) {
-            if (this.checkIdx(idx)) {
+            if (!this.checkIdx(idx)) {
                 return;
             }
             let link = this.prepLink(item);
@@ -101,7 +102,7 @@ define(["require", "exports", "./Link"], function (require, exports, Link_1) {
             this._length++;
         }
         checkIdx(idx) {
-            if (idx < 0 || idx > this._length || this._length == 0) {
+            if (idx < 0 || idx > this._length) {
                 return false;
             }
             while (this._lastIdx < idx) {

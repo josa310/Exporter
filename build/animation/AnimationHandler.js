@@ -9,7 +9,7 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             this._transformChanged;
             this._params = new AnimParams_1.AnimParams();
             this._startParams = new AnimParams_1.AnimParams();
-            this._animations = new Array();
+            this._runningAnimations = new Array();
             this._animList = new LinkedList_1.LinkedList();
             this._id = AnimationHandler.OBJ_CNT++;
         }
@@ -22,7 +22,7 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             this._startParams.copy(this.params);
         }
         add(newAnim) {
-            this._animations.push(newAnim);
+            this._runningAnimations.push(newAnim);
             if (this._frameCnt < newAnim.endFrame) {
                 this._frameCnt = newAnim.endFrame;
             }
@@ -32,7 +32,7 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
                 this._animList.linkAfter(newList);
                 return;
             }
-            let anims = this._animList.current;
+            let anims = this._animList.first;
             while (anims) {
                 let anim = anims.current;
                 if (newAnim.startFrame < anim.startFrame) {
@@ -54,9 +54,8 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
         start() {
             this._frameIdx = 0;
             this._isPlaying = true;
-            this._nextAnimList = this._animList.getByIdx(0);
+            this._animations = this._animList.first;
             this._params.copy(this._startParams);
-            console.log(this._animList.length);
         }
         update() {
             if (!this._isPlaying) {
@@ -73,18 +72,18 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             return this._isPlaying;
         }
         startAnimsOfFrame() {
-            if (!this._nextAnimList || this._nextAnimList.first.startFrame != this._frameIdx) {
+            if (!this._animations || this._animations.first.startFrame != this._frameIdx) {
                 return;
             }
-            let animation = this._nextAnimList.first;
+            let animation = this._animations.first;
             while (animation) {
                 animation.start();
-                animation = this._nextAnimList.next;
+                animation = this._animations.next;
             }
-            this._nextAnimList = this._animList.next;
+            this._animations = this._animList.next;
         }
         updateValues() {
-            for (let animation of this._animations) {
+            for (let animation of this._runningAnimations) {
                 if (!animation.update()) {
                     continue;
                 }
