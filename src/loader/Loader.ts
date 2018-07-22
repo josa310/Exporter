@@ -1,5 +1,6 @@
-import { Asset } from './layer/Asset';
-import { Layer } from './layer/Layer';
+import { Layer } from "../layer/Layer";
+import { Asset } from "../layer/Asset";
+import { LayerFactory } from "./LayerFactory";
 
 export class Loader
 {
@@ -12,6 +13,7 @@ export class Loader
     protected _waitFor: number;
     protected _layers: Layer[];
     protected _rootLayer: Layer;
+    protected _layerFactory: LayerFactory;
     protected _httpRequest: XMLHttpRequest;
     protected _assets: {[key: string]: Asset};
 
@@ -26,7 +28,8 @@ export class Loader
         this._assets = {};
         this._path = path;
         this._layers = layers;
-
+        this._layerFactory = new LayerFactory();
+        
         this.loadJSON();
     }
     
@@ -73,9 +76,9 @@ export class Loader
 
     protected loadLayers(data: any): void
     {
-        for (let layerData of data.layers)
+        for (let ld of data.layers)
         {
-            this._layers.push(new Layer(layerData, this._assets[layerData.refId]));
+            this._layers.push(this._layerFactory.createLayer(ld, this._assets));
         }
     }
 
@@ -99,7 +102,7 @@ export class Loader
         this._waitFor--;
         if (this._waitFor == 0)
         {
-            let root: Layer = new Layer(null, null);
+            let root: Layer = this._layerFactory.createEmpty();
             this.setParents(root);
             this._rootLayer = root;
             this._cb();

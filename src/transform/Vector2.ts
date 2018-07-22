@@ -1,8 +1,7 @@
-export class Vector2
-{
-    protected _x: number;
-    protected _y: number;
+import { Matrix } from "./Matrix";
 
+export class Vector2 extends Matrix
+{
     protected _nX: number;
     protected _nY: number;
 
@@ -10,22 +9,22 @@ export class Vector2
 
     public get x(): number
     {
-        return this._x;
+        return this._data[0][0];
     }
 
     public set x(value: number)
     {
-        this._x = value;
+        this._data[0][0] = value;
     }
 
     public get y(): number
     {
-        return this._y;
+        return this._data[1][0];
     }
 
     public set y(value: number)
     {
-        this._y = value;
+        this._data[1][0] = value;
     }
 
     public get normalX(): number
@@ -40,8 +39,9 @@ export class Vector2
 
     constructor(x: number = 0, y: number = 0)
     {
-        this._x = x;
-        this._y = y;
+        super(3, 1);
+        this.x = x;
+        this.y = y;
     }
 
     public get magnitude(): number
@@ -59,24 +59,18 @@ export class Vector2
 
     protected calcMagnitude(): void
     {
-        this._magnitude = Math.sqrt(this._x * this._x + this._y * this._y);
+        this._magnitude = Math.sqrt(this.x * this.x + this.y * this.y);
     }
 
     protected calcNormal(): void
     {
-        this._nX = this._x / this._magnitude;
-        this._nY = this._y / this._magnitude;
+        this._nX = this.x / this._magnitude;
+        this._nY = this.y / this._magnitude;
     }
 
     public copy(v: Vector2): void
     {
-        if (!v)
-        {
-            return;
-        }
-        
-        this._x = v._x;
-        this._y = v._y;
+        super.copy(v);        
         this.update();
     }
 }

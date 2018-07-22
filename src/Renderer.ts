@@ -1,7 +1,7 @@
-import { Loader } from './Loader';
+import { Loader } from './loader/Loader';
 import { Layer } from "./layer/Layer";
-import { Transform2D } from "./layer/Transform2D";
-import { AnimParams } from './animation/AnimParams';
+import { Transform2D } from "./transform/Transform2D";
+import { AnimationData } from './animation/AnimationData';
 
 export class Renderer
 {

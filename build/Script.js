@@ -1,4 +1,4 @@
-define(["require", "exports", "./Loader", "./layer/Layer", "./Renderer"], function (require, exports, Loader_1, Layer_1, Renderer_1) {
+define(["require", "exports", "./loader/Loader", "./layer/Layer", "./Renderer"], function (require, exports, Loader_1, Layer_1, Renderer_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Script {

@@ -1,7 +1,7 @@
-import { Vector2 } from "../layer/Vector2";
-import { Transform2D } from "../layer/Transform2D";
+import { Vector2 } from "../transform/Vector2";
+import { Transform2D } from "../transform/Transform2D";
 
-export class AnimParams
+export class AnimationData
 {
     protected _scale: Vector2;
     protected _opacity: number;
@@ -88,7 +88,7 @@ export class AnimParams
         this._transform.copy(transform);
     }
 
-    public copy(params: AnimParams): void
+    public copy(params: AnimationData): void
     {
         this._opacity = params._opacity;
         this._rotation = params._rotation;

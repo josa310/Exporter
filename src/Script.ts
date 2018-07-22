@@ -1,4 +1,4 @@
-import { Loader } from './Loader';
+import { Loader } from './loader/Loader';
 import { Layer } from './layer/Layer';
 import { Renderer } from './Renderer';
 

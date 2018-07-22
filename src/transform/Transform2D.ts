@@ -1,4 +1,4 @@
-import { Matrix } from "./Matrix";
+import { Matrix } from "../transform/Matrix";
 import { Vector2 } from "./Vector2";
 
 export class Transform2D extends Matrix

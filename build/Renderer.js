@@ -1,4 +1,4 @@
-define(["require", "exports", "./Loader"], function (require, exports, Loader_1) {
+define(["require", "exports", "./loader/Loader"], function (require, exports, Loader_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Renderer {

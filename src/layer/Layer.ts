@@ -1,9 +1,9 @@
 import { Asset } from './Asset';
-import { Transform2D } from './Transform2D';
-import { Vector2 } from './Vector2';
-import { MathUtils } from '../MathUtils';
+import { Transform2D } from '../transform/Transform2D';
+import { Vector2 } from '../transform/Vector2';
+import { MathUtils } from '../transform/MathUtils';
 import { Animation, AnimType, Transitions } from '../animation/Animation';
-import { AnimParams } from '../animation/AnimParams';
+import { AnimationData } from '../animation/AnimationData';
 import { AnimationHandler } from '../animation/AnimationHandler';
 import { LinkedList } from '../list/LinkedList';
 
@@ -14,7 +14,6 @@ export class Layer
     protected _updated: boolean;
     
     protected _asset: Asset;
-    protected _params: AnimParams;
     protected _animation: AnimationHandler;
     protected _globalTransform: Transform2D;
 
@@ -33,9 +32,9 @@ export class Layer
         this._updated = value;
     }
 
-    public get animParams(): AnimParams
+    public get animParams(): AnimationData
     {
-        return this._params;
+        return this._animation.params;
     }
 
     public get children(): LinkedList<Layer>
@@ -66,19 +65,17 @@ export class Layer
     public skew: number;
     public skewAxis: number;
 
-    constructor(data: any, asset: Asset)
+    constructor(id: number, parentId: number, asset: Asset, animation: AnimationHandler)
     {
-        this._asset = asset;
+        this._parent = null;
+        this._children = null;
         this._updated = false;
         this._globalTransform = new Transform2D();
-        this._params = new AnimParams();
-
-        if (data == null)
-        {
-            return;
-        }
         
-        this.init(data);
+        this._id = id;
+        this._asset = asset;
+        this._parentId = parentId;
+        this._animation = animation;
     }
     
     public addChild(child: Layer): void
@@ -103,36 +100,8 @@ export class Layer
             this._globalTransform.identity();
         }
         
-        this._globalTransform.dot(this._params.transform, this._globalTransform);
+        this._globalTransform.dot(this._animation.params.transform, this._globalTransform);
         this._updated = true;
-    }
-    
-    protected init(data: any): void
-    {
-        this._parent = null;
-        this._children = null;
-        
-        this._id = data.ind;
-        
-        this._parentId = data.parent;
-        this._animation = new AnimationHandler();
-        
-        // TODO better condition
-        if (data.ef)        
-        {
-            this.skew = data.ef[0].ef[5].v.k;
-            this.skewAxis = data.ef[0].ef[6].v.k;
-        }
-        
-        const transitions = data.ks;
-        this.processTranslation(transitions.p);
-        this.processRotation(transitions.r);
-        this.processScale(transitions.s);
-        this.processAnchor(transitions.a);
-        this.processOpacity(transitions.o);
-
-        this._animation.params = this._params;
-        this._params.copy(this._animation.params);
     }
     
     public startAnim(): void
@@ -142,94 +111,6 @@ export class Layer
 
     public updateAnimation(): boolean
     {
-        let retVal: boolean = this._animation.update();
-        this._params.copy(this._animation.params);
-
-        return retVal;
+        return this._animation.update();
     }
-        
-    protected processTranslation(data: any): void
-    {
-        if (data.a)
-        {
-            // TODO: Implement animation handling
-            this.extractAnim(data, AnimType.TRANSLATION);
-            this._params.translation = new Vector2(data.k[0].s[0], data.k[0].s[1]);
-        }
-        else
-        {
-            // this._localTransform.translate(data.k[0], data.k[1]);
-            this._params.translation = new Vector2(data.k[0], data.k[1]);
-        }
-    }
-
-    protected processRotation(data: any): void
-    {
-        if (data.a)
-        {
-            this.extractAnim(data, AnimType.ROTATION);
-            this._params.rotation = data.k[0].s[0] * MathUtils.DEG_TO_RAD;
-
-        }
-        else
-        {
-            this.animParams.rotation = data.k * MathUtils.DEG_TO_RAD;
-        }
-    }
-
-    protected processScale(data: any): void
-    {
-        if (data.a)
-        {
-            // TODO: Implement animation handling
-            this.extractAnim(data, AnimType.SCALE);
-            this._params.scale = new Vector2(data.k[0].s[0] / 100, data.k[0].s[1] / 100);
-
-        }
-        else
-        {
-            // this._localTransform.scale(data.k[0] / 100);
-            this._params.scale = new Vector2(data.k[0] / 100, data.k[1] / 100);
-        }
-    }
-
-    protected processAnchor(data: any): void
-    {
-        if (data.a)
-        {
-            // TODO: Implement animation handling
-            this.extractAnim(data, AnimType.ANCHOR);
-            this._params.anchor = new Vector2(-data.k[0].s[0], -data.k[0].s[1]);
-
-        }
-        else
-        {
-            this._params.anchor = new Vector2(-data.k[0], -data.k[1]);
-        }
-    }
-
-    protected processOpacity(data: any): void
-    {
-        if (data.a)
-        {
-            this.extractAnim(data, AnimType.OPACITY);
-            this._params.opacity = data.k[0].s[0];
-
-        }
-        else
-        {
-            this._params.opacity = data.k / 100;
-        }
-    }
-
-    protected extractAnim(data: any, type: AnimType): void
-    {
-        let cnt: number = data.k.length;
-        for (let idx: number = 0; idx < cnt - 1; idx++)
-        {
-            let animation: Animation = new Animation(data.k[idx].t, data.k[idx+1].t, data.k[idx].s, data.k[idx].e, type);
-            this._animation.add(animation);
-        }
-    }
-
 }

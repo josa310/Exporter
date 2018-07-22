@@ -1,4 +1,4 @@
-define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../MathUtils", "../list/LinkedList"], function (require, exports, Animation_1, AnimParams_1, Animation_2, MathUtils_1, LinkedList_1) {
+define(["require", "exports", "./Animation", "./AnimationData", "./Animation", "../transform/MathUtils", "../list/LinkedList"], function (require, exports, Animation_1, AnimationData_1, Animation_2, MathUtils_1, LinkedList_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AnimationHandler {
@@ -7,8 +7,8 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             this._frameIdx = 0;
             this._isPlaying = false;
             this._transformChanged;
-            this._params = new AnimParams_1.AnimParams();
-            this._startParams = new AnimParams_1.AnimParams();
+            this._params = new AnimationData_1.AnimationData();
+            this._startParams = new AnimationData_1.AnimationData();
             this._runningAnimations = new LinkedList_1.LinkedList();
             this._animations = new LinkedList_1.LinkedList();
             this._id = AnimationHandler.OBJ_CNT++;
@@ -18,6 +18,10 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
         }
         set params(value) {
             this._params.copy(value);
+            this.updateTransform();
+            this._startParams.copy(this.params);
+        }
+        updateParams() {
             this.updateTransform();
             this._startParams.copy(this.params);
         }
@@ -55,7 +59,7 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             if (!this._isPlaying) {
                 return false;
             }
-            this.startScheduledAnimation();
+            this.startScheduledAnimations();
             this._transformChanged = false;
             this.updateValues();
             if (this._transformChanged) {
@@ -65,7 +69,7 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             this._isPlaying = this._frameIdx < this._frameCnt;
             return this._isPlaying;
         }
-        startScheduledAnimation() {
+        startScheduledAnimations() {
             if (!this._scheduledAnimations || this._scheduledAnimations.first.startFrame != this._frameIdx) {
                 return;
             }

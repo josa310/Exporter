@@ -1,10 +1,10 @@
 import { Link } from './../list/Link';
 import { AnimType } from "./Animation";
 import { Animation } from "./Animation";
-import { AnimParams } from "./AnimParams";
+import { AnimationData } from "./AnimationData";
 import { Transitions } from "./Animation";
-import { MathUtils } from "../MathUtils";
-import { Transform2D } from "../layer/Transform2D";
+import { MathUtils } from "../transform/MathUtils";
+import { Transform2D } from "../transform/Transform2D";
 import { LinkedList } from '../list/LinkedList';
 
 export class AnimationHandler
@@ -12,8 +12,8 @@ export class AnimationHandler
     protected _frameCnt: number;
     protected _frameIdx: number;
     protected _isPlaying: boolean;
-    protected _params: AnimParams;
-    protected _startParams: AnimParams;
+    protected _params: AnimationData;
+    protected _startParams: AnimationData;
     protected _transformChanged: boolean;
     
     protected _runningAnimations: LinkedList<Animation>;
@@ -23,16 +23,16 @@ export class AnimationHandler
     protected static OBJ_CNT: number = 0;
     public _id: number;
 
-    public get params(): AnimParams
+    public get params(): AnimationData
     {
         return this._params;
     }
 
-    public set params(value: AnimParams)
+    public set params(value: AnimationData)
     {
         this._params.copy(value);
         this.updateTransform();
-        this._startParams.copy(this.params)
+        this._startParams.copy(this.params);
     }
 
     constructor()
@@ -41,12 +41,18 @@ export class AnimationHandler
         this._frameIdx = 0;
         this._isPlaying = false;
         this._transformChanged;
-        this._params = new AnimParams();
-        this._startParams = new AnimParams();
+        this._params = new AnimationData();
+        this._startParams = new AnimationData();
         this._runningAnimations = new LinkedList<Animation>();
         this._animations = new LinkedList<LinkedList<Animation>>();
 
         this._id = AnimationHandler.OBJ_CNT++;
+    }
+
+    public updateParams(): void
+    {
+        this.updateTransform();
+        this._startParams.copy(this.params);
     }
 
     public add(newAnimation: Animation): void
@@ -101,7 +107,7 @@ export class AnimationHandler
             return false;
         }
 
-        this.startScheduledAnimation();
+        this.startScheduledAnimations();
         
         this._transformChanged = false;
         this.updateValues();
@@ -118,7 +124,7 @@ export class AnimationHandler
         return this._isPlaying;
     }
 
-    protected startScheduledAnimation(): void
+    protected startScheduledAnimations(): void
     {
         if (!this._scheduledAnimations || this._scheduledAnimations.first.startFrame != this._frameIdx)
         {

@@ -1,4 +1,4 @@
-define(["require", "exports", "./layer/Asset", "./layer/Layer"], function (require, exports, Asset_1, Layer_1) {
+define(["require", "exports", "../layer/Layer", "../layer/Asset", "./LayerFactory"], function (require, exports, Layer_1, Asset_1, LayerFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Loader {
@@ -10,6 +10,7 @@ define(["require", "exports", "./layer/Asset", "./layer/Layer"], function (requi
             this._assets = {};
             this._path = path;
             this._layers = layers;
+            this._layerFactory = new LayerFactory_1.LayerFactory();
             this.loadJSON();
         }
         loadJSON() {
@@ -41,12 +42,9 @@ define(["require", "exports", "./layer/Asset", "./layer/Layer"], function (requi
             }
         }
         loadLayers(data) {
-            for (let layer of data.layers) {
-                this._layers.push(this.createLayer(layer));
+            for (let ld of data.layers) {
+                this._layers.push(this._layerFactory.createLayer(ld, this._assets));
             }
-        }
-        createLayer(data) {
-            return new Layer_1.Layer(data, this._assets[data.refId]);
         }
         setParents(root) {
             for (let layer of this._layers) {
@@ -61,7 +59,7 @@ define(["require", "exports", "./layer/Asset", "./layer/Layer"], function (requi
         onLoad() {
             this._waitFor--;
             if (this._waitFor == 0) {
-                let root = new Layer_1.Layer(null, null);
+                let root = this._layerFactory.createEmpty();
                 this.setParents(root);
                 this._rootLayer = root;
                 this._cb();

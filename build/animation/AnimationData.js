@@ -1,7 +1,7 @@
 define(["require", "exports", "../transform/Vector2", "../transform/Transform2D"], function (require, exports, Vector2_1, Transform2D_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AnimParams {
+    class AnimationData {
         get scale() {
             return this._scale;
         }
@@ -59,6 +59,6 @@ define(["require", "exports", "../transform/Vector2", "../transform/Transform2D"
             this.transform.copy(params.transform);
         }
     }
-    exports.AnimParams = AnimParams;
+    exports.AnimationData = AnimationData;
 });
-//# sourceMappingURL=AnimParams.js.map
+//# sourceMappingURL=AnimationData.js.map
