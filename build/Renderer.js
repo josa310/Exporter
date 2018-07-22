@@ -49,17 +49,21 @@ define(["require", "exports", "./Loader"], function (require, exports, Loader_1)
         }
         updateLayerTransforms(layer) {
             while (layer) {
-                layer.updateTransform();
-                if (!layer.updated && layer.firstChild) {
-                    layer.updated = true;
-                    layer = layer.firstChild;
+                if (!layer.updated) {
+                    layer.updateTransform();
+                    if (layer.children) {
+                        layer.children.first;
+                    }
                 }
-                else if (layer.next) {
-                    layer = layer.next;
+                if (layer.children) {
+                    if (layer.children.current) {
+                        let tmp = layer;
+                        layer = layer.children.current;
+                        tmp.children.next;
+                        continue;
+                    }
                 }
-                else {
-                    layer = layer.parent;
-                }
+                layer = layer.parent;
             }
         }
     }

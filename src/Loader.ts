@@ -79,11 +79,18 @@ export class Loader
         }
     }
 
-    protected orderLayers(root: Layer)
+    protected setParents(root: Layer)
     {
         for (let layer of this._layers)
         {
-            (layer.parentId ? this._layers[layer.parentId - 1] : root).addChild(layer);
+            if (layer.parentId)
+            {
+                this._layers[layer.parentId - 1].addChild(layer);
+            }
+            else
+            {
+                root.addChild(layer);
+            }
         }
     }
 
@@ -93,7 +100,7 @@ export class Loader
         if (this._waitFor == 0)
         {
             let root: Layer = new Layer(null, null);
-            this.orderLayers(root);
+            this.setParents(root);
             this._rootLayer = root;
             this._cb();
         }

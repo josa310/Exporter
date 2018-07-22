@@ -5,46 +5,47 @@ import { MathUtils } from '../MathUtils';
 import { Animation, AnimType, Transitions } from '../animation/Animation';
 import { AnimParams } from '../animation/AnimParams';
 import { AnimationHandler } from '../animation/AnimationHandler';
+import { LinkedList } from '../list/LinkedList';
 
 export class Layer
 {
     public static FPS: number = 1000 / 30;
-
-    public updated: boolean = false;
     
-    protected _id: number;
-    protected _next: Layer;
-    protected _prev: Layer;
-    protected _parent: Layer;
-    protected _child: Layer;
-    
-    protected _parentId: number;
-    
-    protected _globalTransform: Transform2D;
+    protected _updated: boolean;
     
     protected _asset: Asset;
-
     protected _params: AnimParams;
     protected _animation: AnimationHandler;
+    protected _globalTransform: Transform2D;
+
+    protected _id: number;
+    protected _parent: Layer;
+    protected _parentId: number;
+    protected _children: LinkedList<Layer>;
+
+    public get updated(): boolean
+    {
+        return this._updated
+    }
+
+    public set updated(value: boolean)
+    {
+        this._updated = value;
+    }
 
     public get animParams(): AnimParams
     {
         return this._params;
     }
 
-    public get firstChild(): Layer
+    public get children(): LinkedList<Layer>
     {
-        return this._child;
+        return this._children;
     }
 
     public get parentId(): number
     {
         return this._parentId;
-    }
-
-    public get next(): Layer
-    {
-        return this._next;
     }
 
     public get parent(): Layer
@@ -68,9 +69,10 @@ export class Layer
     constructor(data: any, asset: Asset)
     {
         this._asset = asset;
+        this._updated = false;
         this._globalTransform = new Transform2D();
         this._params = new AnimParams();
-        
+
         if (data == null)
         {
             return;
@@ -81,14 +83,13 @@ export class Layer
     
     public addChild(child: Layer): void
     {
-        if (this._child)
+        if (!this._children)
         {
-            this._child._prev = child;
-            child._next = this._child;
-        }
-        
-        this._child = child;
-        this._child._parent = this;
+            this._children = new LinkedList<Layer>();
+        }   
+
+        this._children.pushToEnd(child);
+        child._parent = this;
     }
     
     public updateTransform(): void
@@ -103,14 +104,13 @@ export class Layer
         }
         
         this._globalTransform.dot(this._params.transform, this._globalTransform);
+        this._updated = true;
     }
     
     protected init(data: any): void
     {
-        this._next = null;
-        this._prev = null;
         this._parent = null;
-        this._child = null;
+        this._children = null;
         
         this._id = data.ind;
         

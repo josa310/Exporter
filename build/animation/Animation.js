@@ -24,24 +24,6 @@ define(["require", "exports"], function (require, exports) {
         get type() {
             return this._type;
         }
-        get sibling() {
-            return this._sibling;
-        }
-        get next() {
-            return this._next;
-        }
-        get prev() {
-            return this._prev;
-        }
-        set sibling(value) {
-            this._sibling = value;
-        }
-        set next(value) {
-            this._next = value;
-        }
-        set prev(value) {
-            this._prev = value;
-        }
         get startFrame() {
             return this._startFrame;
         }

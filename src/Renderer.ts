@@ -85,21 +85,29 @@ export class Renderer
     {
         while (layer)
         {
-            layer.updateTransform();
-            
-            if (!layer.updated && layer.firstChild)
+            if (!layer.updated)
             {
-                layer.updated = true;
-                layer = layer.firstChild;
+                layer.updateTransform();
+                if (layer.children)
+                {
+                    layer.children.first;
+                }
             }
-            else if (layer.next)
+
+            if (layer.children)
             {
-                layer = layer.next;
+                if (layer.children.current)
+                {
+                    let tmp: Layer = layer;
+                    layer = layer.children.current;
+
+                    tmp.children.next;
+
+                    continue;
+                }
             }
-            else
-            {
-                layer = layer.parent;
-            }
+
+            layer = layer.parent;
         }
     }
 }

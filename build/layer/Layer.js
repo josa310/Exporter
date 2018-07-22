@@ -1,10 +1,10 @@
-define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../animation/Animation", "../animation/AnimParams", "../animation/AnimationHandler"], function (require, exports, Transform2D_1, Vector2_1, MathUtils_1, Animation_1, AnimParams_1, AnimationHandler_1) {
+define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../animation/Animation", "../animation/AnimParams", "../animation/AnimationHandler", "../list/LinkedList"], function (require, exports, Transform2D_1, Vector2_1, MathUtils_1, Animation_1, AnimParams_1, AnimationHandler_1, LinkedList_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Layer {
         constructor(data, asset) {
-            this.updated = false;
             this._asset = asset;
+            this._updated = false;
             this._globalTransform = new Transform2D_1.Transform2D();
             this._params = new AnimParams_1.AnimParams();
             if (data == null) {
@@ -12,17 +12,20 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             }
             this.init(data);
         }
+        get updated() {
+            return this._updated;
+        }
+        set updated(value) {
+            this._updated = value;
+        }
         get animParams() {
             return this._params;
         }
-        get firstChild() {
-            return this._child;
+        get children() {
+            return this._children;
         }
         get parentId() {
             return this._parentId;
-        }
-        get next() {
-            return this._next;
         }
         get parent() {
             return this._parent;
@@ -34,12 +37,11 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
             return this._asset;
         }
         addChild(child) {
-            if (this._child) {
-                this._child._prev = child;
-                child._next = this._child;
+            if (!this._children) {
+                this._children = new LinkedList_1.LinkedList();
             }
-            this._child = child;
-            this._child._parent = this;
+            this._children.pushToEnd(child);
+            child._parent = this;
         }
         updateTransform() {
             if (this._parent) {
@@ -49,12 +51,11 @@ define(["require", "exports", "./Transform2D", "./Vector2", "../MathUtils", "../
                 this._globalTransform.identity();
             }
             this._globalTransform.dot(this._params.transform, this._globalTransform);
+            this._updated = true;
         }
         init(data) {
-            this._next = null;
-            this._prev = null;
             this._parent = null;
-            this._child = null;
+            this._children = null;
             this._id = data.ind;
             this._parentId = data.parent;
             this._animation = new AnimationHandler_1.AnimationHandler();

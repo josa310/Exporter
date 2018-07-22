@@ -45,16 +45,21 @@ define(["require", "exports", "./layer/Asset", "./layer/Layer"], function (requi
                 this._layers.push(new Layer_1.Layer(layerData, this._assets[layerData.refId]));
             }
         }
-        orderLayers(root) {
+        setParents(root) {
             for (let layer of this._layers) {
-                (layer.parentId ? this._layers[layer.parentId - 1] : root).addChild(layer);
+                if (layer.parentId) {
+                    this._layers[layer.parentId - 1].addChild(layer);
+                }
+                else {
+                    root.addChild(layer);
+                }
             }
         }
         onLoad() {
             this._waitFor--;
             if (this._waitFor == 0) {
                 let root = new Layer_1.Layer(null, null);
-                this.orderLayers(root);
+                this.setParents(root);
                 this._rootLayer = root;
                 this._cb();
             }

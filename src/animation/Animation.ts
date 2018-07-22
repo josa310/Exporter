@@ -21,10 +21,6 @@ export enum AnimType
 
 export class Animation
 {
-    protected _next: Animation;
-    protected _prev: Animation;
-    protected _sibling: Animation;
-
     protected _alpha: number;
     protected _frameCnt: number;
     protected _frameIdx: number;
@@ -38,36 +34,6 @@ export class Animation
     public get type(): AnimType
     {
         return this._type;
-    }
-
-    public get sibling(): Animation
-    {
-        return this._sibling;
-    }
-    
-    public get next(): Animation
-    {
-        return this._next;
-    }
-    
-    public get prev(): Animation
-    {
-        return this._prev;
-    }
-
-    public set sibling(value: Animation)
-    {
-        this._sibling = value;
-    }
-    
-    public set next(value: Animation)
-    {
-        this._next = value;
-    }
-    
-    public set prev(value: Animation)
-    {
-        this._prev = value;
     }
 
     public get startFrame(): number
