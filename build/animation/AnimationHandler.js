@@ -9,8 +9,8 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             this._transformChanged;
             this._params = new AnimParams_1.AnimParams();
             this._startParams = new AnimParams_1.AnimParams();
-            this._runningAnimations = new Array();
-            this._animList = new LinkedList_1.LinkedList();
+            this._runningAnimations = new LinkedList_1.LinkedList();
+            this._animations = new LinkedList_1.LinkedList();
             this._id = AnimationHandler.OBJ_CNT++;
         }
         get params() {
@@ -21,47 +21,41 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             this.updateTransform();
             this._startParams.copy(this.params);
         }
-        add(newAnim) {
-            this._runningAnimations.push(newAnim);
-            if (this._frameCnt < newAnim.endFrame) {
-                this._frameCnt = newAnim.endFrame;
+        add(newAnimation) {
+            if (this._frameCnt < newAnimation.endFrame) {
+                this._frameCnt = newAnimation.endFrame;
             }
-            if (this._animList.length == 0) {
-                let newList = new LinkedList_1.LinkedList();
-                newList.linkAfter(newAnim);
-                this._animList.linkAfter(newList);
-                return;
+            if (this._animations.first) {
+                do {
+                    let animation = this._animations.current.first;
+                    if (newAnimation.startFrame < animation.startFrame) {
+                        this._animations.linkBefore(this.createAnimList(newAnimation));
+                        return;
+                    }
+                    else if (newAnimation.startFrame == animation.startFrame) {
+                        this._animations.current.pushToEnd(newAnimation);
+                        return;
+                    }
+                } while (this._animations.next);
             }
-            let anims = this._animList.first;
-            while (anims) {
-                let anim = anims.current;
-                if (newAnim.startFrame < anim.startFrame) {
-                    let newList = new LinkedList_1.LinkedList();
-                    newList.linkAfter(newAnim);
-                    this._animList.linkBefore(newList);
-                    return;
-                }
-                else if (newAnim.startFrame == anim.startFrame) {
-                    anims.linkAfter(newAnim);
-                    return;
-                }
-                anims = this._animList.next;
-            }
-            let newList = new LinkedList_1.LinkedList();
-            newList.linkAfter(newAnim);
-            this._animList.linkAfter(newList);
+            this._animations.pushToEnd(this.createAnimList(newAnimation));
+        }
+        createAnimList(anim) {
+            let list = new LinkedList_1.LinkedList();
+            list.pushToEnd(anim);
+            return list;
         }
         start() {
             this._frameIdx = 0;
             this._isPlaying = true;
-            this._animations = this._animList.first;
+            this._scheduledAnimations = this._animations.first;
             this._params.copy(this._startParams);
         }
         update() {
             if (!this._isPlaying) {
                 return false;
             }
-            this.startAnimsOfFrame();
+            this.startScheduledAnimation();
             this._transformChanged = false;
             this.updateValues();
             if (this._transformChanged) {
@@ -71,21 +65,25 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
             this._isPlaying = this._frameIdx < this._frameCnt;
             return this._isPlaying;
         }
-        startAnimsOfFrame() {
-            if (!this._animations || this._animations.first.startFrame != this._frameIdx) {
+        startScheduledAnimation() {
+            if (!this._scheduledAnimations || this._scheduledAnimations.first.startFrame != this._frameIdx) {
                 return;
             }
-            let animation = this._animations.first;
-            while (animation) {
-                animation.start();
-                animation = this._animations.next;
-            }
-            this._animations = this._animList.next;
+            do {
+                this._scheduledAnimations.current.start();
+                this._runningAnimations.pushToEnd(this._scheduledAnimations.current);
+            } while (this._scheduledAnimations.next);
+            this._scheduledAnimations = this._animations.next;
         }
         updateValues() {
-            for (let animation of this._runningAnimations) {
-                if (!animation.update()) {
-                    continue;
+            let animation = this._runningAnimations.first;
+            while (animation) {
+                while (!animation.update()) {
+                    this._runningAnimations.removeCurrent();
+                    animation = this._runningAnimations.current;
+                    if (!animation) {
+                        return;
+                    }
                 }
                 switch (animation.type) {
                     case Animation_1.AnimType.OPACITY:
@@ -111,6 +109,7 @@ define(["require", "exports", "./Animation", "./AnimParams", "./Animation", "../
                         this._params.anchor.y = -animation.getValue(Animation_2.Transitions.ANC_Y);
                         break;
                 }
+                animation = this._runningAnimations.next;
             }
         }
         updateTransform() {
