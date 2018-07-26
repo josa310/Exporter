@@ -88,11 +88,16 @@ define(["require", "exports", "./Link"], function (require, exports, Link_1) {
             this._last = link;
             this._length++;
         }
+        clear() {
+            this.first;
+            while (this.current) {
+                this.removeCurrent();
+            }
+        }
         removeCurrent() {
             if (!this._current) {
                 return;
             }
-            let next = this._current.next;
             if (this._current.next) {
                 this._current.next.prev = this._current.prev;
             }

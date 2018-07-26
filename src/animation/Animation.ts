@@ -8,6 +8,7 @@ export enum Transitions
     ANC_Y = 1,
     TRANS_X = 0,
     TRANS_Y = 1,
+    TIME_RM = 0,
 }
 
 export enum AnimType
@@ -16,7 +17,8 @@ export enum AnimType
     ROTATION,
     SCALE,
     OPACITY,
-    ANCHOR
+    ANCHOR,
+    COMPOSIT
 }
 
 export class Animation
@@ -44,6 +46,11 @@ export class Animation
     public get endFrame(): number
     {
         return this._startFrame + this._frameCnt;
+    }
+
+    public get frameCount(): number
+    {
+        return this._frameCnt;
     }
 
     public get isPalying(): boolean
@@ -84,6 +91,17 @@ export class Animation
         this._isPlaying = true;
         this._frameIdx = 0;
     }
+
+    public startAt(idx: number): void
+    {
+        if (idx < 0 || idx > this._frameCnt)
+        {
+            return;
+        }
+
+        this.start();
+        this._frameIdx = idx;
+    }
     
     public stop(): void
     {
@@ -102,7 +120,6 @@ export class Animation
 
         this.updateValues();
 
-        // Goes to the end (preferably)
         if (this._frameIdx >= this._frameCnt)
         {
             this.stop();

@@ -11,6 +11,7 @@ define(["require", "exports"], function (require, exports) {
         Transitions[Transitions["ANC_Y"] = 1] = "ANC_Y";
         Transitions[Transitions["TRANS_X"] = 0] = "TRANS_X";
         Transitions[Transitions["TRANS_Y"] = 1] = "TRANS_Y";
+        Transitions[Transitions["TIME_RM"] = 0] = "TIME_RM";
     })(Transitions = exports.Transitions || (exports.Transitions = {}));
     var AnimType;
     (function (AnimType) {
@@ -19,6 +20,7 @@ define(["require", "exports"], function (require, exports) {
         AnimType[AnimType["SCALE"] = 2] = "SCALE";
         AnimType[AnimType["OPACITY"] = 3] = "OPACITY";
         AnimType[AnimType["ANCHOR"] = 4] = "ANCHOR";
+        AnimType[AnimType["COMPOSIT"] = 5] = "COMPOSIT";
     })(AnimType = exports.AnimType || (exports.AnimType = {}));
     class Animation {
         get type() {
@@ -29,6 +31,9 @@ define(["require", "exports"], function (require, exports) {
         }
         get endFrame() {
             return this._startFrame + this._frameCnt;
+        }
+        get frameCount() {
+            return this._frameCnt;
         }
         get isPalying() {
             return this._isPlaying;
@@ -53,6 +58,13 @@ define(["require", "exports"], function (require, exports) {
         start() {
             this._isPlaying = true;
             this._frameIdx = 0;
+        }
+        startAt(idx) {
+            if (idx < 0 || idx > this._frameCnt) {
+                return;
+            }
+            this.start();
+            this._frameIdx = idx;
         }
         stop() {
             this._isPlaying = false;

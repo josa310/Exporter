@@ -9,21 +9,20 @@ define(["require", "exports", "./loader/Loader"], function (require, exports, Lo
         render(layers, root) {
             this._canvas.width = Loader_1.Loader.canvasWidth;
             this._canvas.height = Loader_1.Loader.canvasHeight;
-            this.updateLayerTransforms(root);
-            root.updated = false;
+            root.update();
             this.clear();
-            let alive = false;
+            let animating = false;
             for (let idx = layers.length - 1; idx >= 0; idx--) {
                 this._context.save();
                 let layer = layers[idx];
-                layer.updated = false;
-                alive = (layer.updateAnimation() || alive);
+                animating = (layer.animating || animating);
                 this.setParams(layer);
-                if (layer.asset)
+                if (layer.asset) {
                     this._context.drawImage(layer.asset.img, 0, 0);
+                }
                 this._context.restore();
             }
-            if (!alive) {
+            if (!animating) {
                 for (let layer of layers) {
                     layer.startAnim();
                 }
@@ -42,29 +41,6 @@ define(["require", "exports", "./loader/Loader"], function (require, exports, Lo
         clear() {
             this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
             this._context.fillStyle = "#BBBBBB";
-        }
-        drawCanvas() {
-            this._context.strokeStyle = "#FF0000";
-            this._context.strokeRect(0, 0, this._canvas.width, this._canvas.height);
-        }
-        updateLayerTransforms(layer) {
-            while (layer) {
-                if (!layer.updated) {
-                    layer.updateTransform();
-                    if (layer.children) {
-                        layer.children.first;
-                    }
-                }
-                if (layer.children) {
-                    if (layer.children.current) {
-                        let tmp = layer;
-                        layer = layer.children.current;
-                        tmp.children.next;
-                        continue;
-                    }
-                }
-                layer = layer.parent;
-            }
         }
     }
     exports.Renderer = Renderer;

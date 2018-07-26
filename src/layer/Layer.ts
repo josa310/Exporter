@@ -11,8 +11,6 @@ export class Layer
 {
     public static FPS: number = 1000 / 30;
     
-    protected _updated: boolean;
-    
     protected _asset: Asset;
     protected _animation: AnimationHandler;
     protected _globalTransform: Transform2D;
@@ -20,17 +18,8 @@ export class Layer
     protected _id: number;
     protected _parent: Layer;
     protected _parentId: number;
+    protected _animatig: boolean;
     protected _children: LinkedList<Layer>;
-
-    public get updated(): boolean
-    {
-        return this._updated
-    }
-
-    public set updated(value: boolean)
-    {
-        this._updated = value;
-    }
 
     public get animParams(): AnimationData
     {
@@ -62,6 +51,11 @@ export class Layer
         return this._asset;
     }
 
+    public get animating(): boolean
+    {
+        return this._animatig;
+    }
+
     public skew: number;
     public skewAxis: number;
 
@@ -69,11 +63,11 @@ export class Layer
     {
         this._parent = null;
         this._children = null;
-        this._updated = false;
         this._globalTransform = new Transform2D();
         
         this._id = id;
         this._asset = asset;
+        this._animatig = false;
         this._parentId = parentId;
         this._animation = animation;
     }
@@ -89,7 +83,20 @@ export class Layer
         child._parent = this;
     }
     
-    public updateTransform(): void
+    public startAnim(): void
+    {
+        this._animation.start();
+        this._animatig = true;
+    }
+
+    public update(): void
+    {
+        this.updateTransform();
+        this.updateChildren();
+        this._animatig = this._animation.update();
+    }
+    
+    protected updateTransform(): void
     {
         if (this._parent)
         {
@@ -101,16 +108,20 @@ export class Layer
         }
         
         this._globalTransform.dot(this._animation.params.transform, this._globalTransform);
-        this._updated = true;
-    }
-    
-    public startAnim(): void
-    {
-        this._animation.start();
     }
 
-    public updateAnimation(): boolean
+    protected updateChildren(): void
     {
-        return this._animation.update();
+        if (!this._children)
+        {
+            return;
+        }
+
+        let child: Layer = this._children.first;
+        while (child)
+        {
+            child.update();
+            child = this._children.next;
+        }
     }
 }

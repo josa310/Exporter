@@ -6,9 +6,10 @@ export class AnimationData
     protected _scale: Vector2;
     protected _opacity: number;
     protected _rotation: number;
-    protected _transform: Transform2D;
+    protected _timeRemap: number;
     protected _translation: Vector2;
     protected _anchorPoint: Vector2;
+    protected _transform: Transform2D;
 
     // GETTERS
     public get scale(): Vector2
@@ -39,6 +40,11 @@ export class AnimationData
     public get transform(): Transform2D
     {
         return this._transform;
+    }
+
+    public get timeRemap(): number
+    {
+        return this._timeRemap;
     }
 
     // SETTERS
@@ -72,7 +78,12 @@ export class AnimationData
         this._transform.copy(value);
     }
 
-    constructor(translation?: Vector2, scale?: Vector2, anchor?: Vector2, rotation?: number, opacity?: number, transform?: Transform2D)
+    public set timeRemap(value: number)
+    {
+        this._timeRemap = value;
+    }
+
+    constructor(translation?: Vector2, scale?: Vector2, anchor?: Vector2, rotation?: number, opacity?: number, transform?: Transform2D, timeRemap?: number)
     {
         this._scale = new Vector2(1, 1);
         this._anchorPoint = new Vector2();
@@ -81,6 +92,7 @@ export class AnimationData
 
         this._opacity = opacity | 0;
         this._rotation = rotation | 0;
+        this._timeRemap = timeRemap | 0;
 
         this._scale.copy(scale);
         this._anchorPoint.copy(anchor);
@@ -92,6 +104,7 @@ export class AnimationData
     {
         this._opacity = params._opacity;
         this._rotation = params._rotation;
+        this._timeRemap = params._timeRemap;
 
         this._scale.copy(params._scale);
         this._anchorPoint.copy(params._anchorPoint);

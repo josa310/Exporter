@@ -5,18 +5,12 @@ define(["require", "exports", "../transform/Transform2D", "../list/LinkedList"],
         constructor(id, parentId, asset, animation) {
             this._parent = null;
             this._children = null;
-            this._updated = false;
             this._globalTransform = new Transform2D_1.Transform2D();
             this._id = id;
             this._asset = asset;
+            this._animatig = false;
             this._parentId = parentId;
             this._animation = animation;
-        }
-        get updated() {
-            return this._updated;
-        }
-        set updated(value) {
-            this._updated = value;
         }
         get animParams() {
             return this._animation.params;
@@ -36,12 +30,24 @@ define(["require", "exports", "../transform/Transform2D", "../list/LinkedList"],
         get asset() {
             return this._asset;
         }
+        get animating() {
+            return this._animatig;
+        }
         addChild(child) {
             if (!this._children) {
                 this._children = new LinkedList_1.LinkedList();
             }
             this._children.pushToEnd(child);
             child._parent = this;
+        }
+        startAnim() {
+            this._animation.start();
+            this._animatig = true;
+        }
+        update() {
+            this.updateTransform();
+            this.updateChildren();
+            this._animatig = this._animation.update();
         }
         updateTransform() {
             if (this._parent) {
@@ -51,13 +57,16 @@ define(["require", "exports", "../transform/Transform2D", "../list/LinkedList"],
                 this._globalTransform.identity();
             }
             this._globalTransform.dot(this._animation.params.transform, this._globalTransform);
-            this._updated = true;
         }
-        startAnim() {
-            this._animation.start();
-        }
-        updateAnimation() {
-            return this._animation.update();
+        updateChildren() {
+            if (!this._children) {
+                return;
+            }
+            let child = this._children.first;
+            while (child) {
+                child.update();
+                child = this._children.next;
+            }
         }
     }
     Layer.FPS = 1000 / 30;

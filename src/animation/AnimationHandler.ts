@@ -1,11 +1,10 @@
-import { Link } from './../list/Link';
 import { AnimType } from "./Animation";
 import { Animation } from "./Animation";
-import { AnimationData } from "./AnimationData";
 import { Transitions } from "./Animation";
+import { LinkedList } from '../list/LinkedList';
+import { AnimationData } from "./AnimationData";
 import { MathUtils } from "../transform/MathUtils";
 import { Transform2D } from "../transform/Transform2D";
-import { LinkedList } from '../list/LinkedList';
 
 export class AnimationHandler
 {
@@ -13,8 +12,9 @@ export class AnimationHandler
     protected _frameIdx: number;
     protected _isPlaying: boolean;
     protected _params: AnimationData;
-    protected _startParams: AnimationData;
     protected _transformChanged: boolean;
+    protected _startParams: AnimationData;
+    protected _compositAnimation: AnimationHandler;
     
     protected _runningAnimations: LinkedList<Animation>;
     protected _scheduledAnimations: LinkedList<Animation>;
@@ -33,6 +33,11 @@ export class AnimationHandler
         this._params.copy(value);
         this.updateTransform();
         this._startParams.copy(this.params);
+    }
+
+    public set composit(value: AnimationHandler)
+    {
+        this._compositAnimation = value;
     }
 
     constructor()
@@ -96,6 +101,7 @@ export class AnimationHandler
     {
         this._frameIdx = 0;
         this._isPlaying = true;
+        this._transformChanged = false;
         this._scheduledAnimations = this._animations.first;
         this._params.copy(this._startParams);
     }
@@ -108,17 +114,15 @@ export class AnimationHandler
         }
 
         this.startScheduledAnimations();
-        
-        this._transformChanged = false;
         this.updateValues();
-
+        
         if (this._transformChanged)
         {
             this.updateTransform();
         }
+        this._transformChanged = false;
 
         this._frameIdx++;
-
         this._isPlaying = this._frameIdx < this._frameCnt;
 
         return this._isPlaying;
@@ -184,6 +188,9 @@ export class AnimationHandler
                     this._params.anchor.x = -animation.getValue(Transitions.ANC_X);
                     this._params.anchor.y = -animation.getValue(Transitions.ANC_Y);
                     break;
+                
+                case AnimType.COMPOSIT:
+
             }
 
             animation = this._runningAnimations.next;
@@ -199,5 +206,51 @@ export class AnimationHandler
         // TODO: alter scale to enable non uniform scaling
         transform.scale(this._params.scale.x);
         transform.translate(this._params.anchor.x, this._params.anchor.y);
+    }
+
+    protected goToPercentage(percent: number): void
+    {
+
+    }
+
+    protected goToFrame(frame: number): void
+    {
+        if (frame < 0 || frame > this._frameCnt || frame == this._frameIdx)
+        {
+            return;
+        }
+        
+        this._runningAnimations.clear();
+        
+        // Add running animations
+        let possibleAnimations: LinkedList<Animation> = this._animations.first;
+        let tmpRunningAnimations: LinkedList<Animation> = new LinkedList<Animation>();
+        while (possibleAnimations && possibleAnimations.first.startFrame <= frame)
+        {
+            let animation: Animation = possibleAnimations.first;
+            while (animation)
+            {
+                if (animation.endFrame >= frame)
+                {
+                    tmpRunningAnimations.pushToEnd(animation);
+                    animation.startAt(frame - animation.startFrame - 1);
+                }
+                else
+                {
+                    this._runningAnimations.pushToEnd(animation);
+                    animation.startAt(animation.frameCount - 1);
+                }
+                
+                animation = possibleAnimations.next;
+            }
+            
+            possibleAnimations = this._animations.next;
+        }
+        
+        this._params.copy(this._startParams);
+        this._frameIdx = frame;
+        this.updateTransform();
+        
+        this._runningAnimations = tmpRunningAnimations;
     }
 }

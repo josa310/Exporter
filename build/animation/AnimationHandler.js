@@ -1,4 +1,4 @@
-define(["require", "exports", "./Animation", "./AnimationData", "./Animation", "../transform/MathUtils", "../list/LinkedList"], function (require, exports, Animation_1, AnimationData_1, Animation_2, MathUtils_1, LinkedList_1) {
+define(["require", "exports", "./Animation", "./Animation", "../list/LinkedList", "./AnimationData", "../transform/MathUtils"], function (require, exports, Animation_1, Animation_2, LinkedList_1, AnimationData_1, MathUtils_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AnimationHandler {
@@ -20,6 +20,9 @@ define(["require", "exports", "./Animation", "./AnimationData", "./Animation", "
             this._params.copy(value);
             this.updateTransform();
             this._startParams.copy(this.params);
+        }
+        set composit(value) {
+            this._compositAnimation = value;
         }
         updateParams() {
             this.updateTransform();
@@ -52,6 +55,7 @@ define(["require", "exports", "./Animation", "./AnimationData", "./Animation", "
         start() {
             this._frameIdx = 0;
             this._isPlaying = true;
+            this._transformChanged = false;
             this._scheduledAnimations = this._animations.first;
             this._params.copy(this._startParams);
         }
@@ -60,11 +64,11 @@ define(["require", "exports", "./Animation", "./AnimationData", "./Animation", "
                 return false;
             }
             this.startScheduledAnimations();
-            this._transformChanged = false;
             this.updateValues();
             if (this._transformChanged) {
                 this.updateTransform();
             }
+            this._transformChanged = false;
             this._frameIdx++;
             this._isPlaying = this._frameIdx < this._frameCnt;
             return this._isPlaying;
@@ -112,6 +116,7 @@ define(["require", "exports", "./Animation", "./AnimationData", "./Animation", "
                         this._params.anchor.x = -animation.getValue(Animation_2.Transitions.ANC_X);
                         this._params.anchor.y = -animation.getValue(Animation_2.Transitions.ANC_Y);
                         break;
+                    case Animation_1.AnimType.COMPOSIT:
                 }
                 animation = this._runningAnimations.next;
             }
@@ -123,6 +128,35 @@ define(["require", "exports", "./Animation", "./AnimationData", "./Animation", "
             transform.rotate(this._params.rotation);
             transform.scale(this._params.scale.x);
             transform.translate(this._params.anchor.x, this._params.anchor.y);
+        }
+        goToPercentage(percent) {
+        }
+        goToFrame(frame) {
+            if (frame < 0 || frame > this._frameCnt || frame == this._frameIdx) {
+                return;
+            }
+            this._runningAnimations.clear();
+            let possibleAnimations = this._animations.first;
+            let tmpRunningAnimations = new LinkedList_1.LinkedList();
+            while (possibleAnimations && possibleAnimations.first.startFrame <= frame) {
+                let animation = possibleAnimations.first;
+                while (animation) {
+                    if (animation.endFrame >= frame) {
+                        tmpRunningAnimations.pushToEnd(animation);
+                        animation.startAt(frame - animation.startFrame - 1);
+                    }
+                    else {
+                        this._runningAnimations.pushToEnd(animation);
+                        animation.startAt(animation.frameCount - 1);
+                    }
+                    animation = possibleAnimations.next;
+                }
+                possibleAnimations = this._animations.next;
+            }
+            this._params.copy(this._startParams);
+            this._frameIdx = frame;
+            this.updateTransform();
+            this._runningAnimations = tmpRunningAnimations;
         }
     }
     AnimationHandler.OBJ_CNT = 0;

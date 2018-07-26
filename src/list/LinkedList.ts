@@ -141,14 +141,21 @@ export class LinkedList<T>
         this._length++;
     }
 
+    public clear(): void
+    {
+        this.first;
+        while (this.current)
+        {
+            this.removeCurrent();
+        }
+    }
+
     public removeCurrent(): void
     {
         if (!this._current)
         {
             return;
         }
-
-        let next: Link<T> = this._current.next;
 
         if (this._current.next)
         {
