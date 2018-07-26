@@ -135,28 +135,6 @@ define(["require", "exports", "./Animation", "./Animation", "../list/LinkedList"
             if (frame < 0 || frame > this._frameCnt || frame == this._frameIdx) {
                 return;
             }
-            this._runningAnimations.clear();
-            let possibleAnimations = this._animations.first;
-            let tmpRunningAnimations = new LinkedList_1.LinkedList();
-            while (possibleAnimations && possibleAnimations.first.startFrame <= frame) {
-                let animation = possibleAnimations.first;
-                while (animation) {
-                    if (animation.endFrame >= frame) {
-                        tmpRunningAnimations.pushToEnd(animation);
-                        animation.startAt(frame - animation.startFrame - 1);
-                    }
-                    else {
-                        this._runningAnimations.pushToEnd(animation);
-                        animation.startAt(animation.frameCount - 1);
-                    }
-                    animation = possibleAnimations.next;
-                }
-                possibleAnimations = this._animations.next;
-            }
-            this._params.copy(this._startParams);
-            this._frameIdx = frame;
-            this.updateTransform();
-            this._runningAnimations = tmpRunningAnimations;
         }
     }
     AnimationHandler.OBJ_CNT = 0;

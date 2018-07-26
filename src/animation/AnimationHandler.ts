@@ -220,37 +220,8 @@ export class AnimationHandler
             return;
         }
         
-        this._runningAnimations.clear();
-        
-        // Add running animations
-        let possibleAnimations: LinkedList<Animation> = this._animations.first;
-        let tmpRunningAnimations: LinkedList<Animation> = new LinkedList<Animation>();
-        while (possibleAnimations && possibleAnimations.first.startFrame <= frame)
-        {
-            let animation: Animation = possibleAnimations.first;
-            while (animation)
-            {
-                if (animation.endFrame >= frame)
-                {
-                    tmpRunningAnimations.pushToEnd(animation);
-                    animation.startAt(frame - animation.startFrame - 1);
-                }
-                else
-                {
-                    this._runningAnimations.pushToEnd(animation);
-                    animation.startAt(animation.frameCount - 1);
-                }
-                
-                animation = possibleAnimations.next;
-            }
-            
-            possibleAnimations = this._animations.next;
-        }
-        
-        this._params.copy(this._startParams);
-        this._frameIdx = frame;
-        this.updateTransform();
-        
-        this._runningAnimations = tmpRunningAnimations;
+        // Go to last frame: (LastFrame < NewFrame) && (LastFrame > CurrentFrame)
+        // Go to frame: (StartFrame < NewFrame) && (LastFrame > NewFrame)
+       
     }
 }
