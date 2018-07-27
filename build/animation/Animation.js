@@ -60,9 +60,7 @@ define(["require", "exports"], function (require, exports) {
             this._frameIdx = 0;
         }
         startAt(idx) {
-            if (idx < 0 || idx > this._frameCnt) {
-                return;
-            }
+            idx = Math.min(this._frameCnt - 1, Math.max(0, idx));
             this.start();
             this._frameIdx = idx;
         }

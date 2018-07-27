@@ -189,6 +189,22 @@ export class LinkedList<T>
         this._length--;
     }
 
+    public copy(l: LinkedList<T>): void
+    {
+        this.clear();
+        if (l._length == 0)
+        {
+            return;
+        }
+
+        let tmp: Link<T> = l._first;
+        while (tmp)
+        {
+            this.pushToEnd(tmp.data);
+            tmp = tmp.next;
+        }
+    }
+
     protected createLink(item: T): Link<T>
     {
         let link: Link<T>;

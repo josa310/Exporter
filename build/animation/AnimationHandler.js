@@ -56,7 +56,7 @@ define(["require", "exports", "./Animation", "./Animation", "../list/LinkedList"
             this._frameIdx = 0;
             this._isPlaying = true;
             this._transformChanged = false;
-            this._scheduledAnimations = this._animations.first;
+            this._animations.first;
             this._params.copy(this._startParams);
         }
         update() {
@@ -74,14 +74,14 @@ define(["require", "exports", "./Animation", "./Animation", "../list/LinkedList"
             return this._isPlaying;
         }
         startScheduledAnimations() {
-            if (!this._scheduledAnimations || this._scheduledAnimations.first.startFrame != this._frameIdx) {
+            if (!this._animations || !this._animations.current || this._animations.current.first.startFrame != this._frameIdx) {
                 return;
             }
             do {
-                this._scheduledAnimations.current.start();
-                this._runningAnimations.pushToEnd(this._scheduledAnimations.current);
-            } while (this._scheduledAnimations.next);
-            this._scheduledAnimations = this._animations.next;
+                this._animations.current.current.start();
+                this._runningAnimations.pushToEnd(this._animations.current.current);
+            } while (this._animations.current.next);
+            this._animations.next;
         }
         updateValues() {
             let animation = this._runningAnimations.first;
@@ -131,10 +131,38 @@ define(["require", "exports", "./Animation", "./Animation", "../list/LinkedList"
         }
         goToPercentage(percent) {
         }
-        goToFrame(frame) {
-            if (frame < 0 || frame > this._frameCnt || frame == this._frameIdx) {
+        goToFrame(targetFrame) {
+            targetFrame = Math.round(targetFrame);
+            if (targetFrame < 0 || targetFrame > this._frameCnt || targetFrame == this._frameIdx) {
                 return;
             }
+            if (targetFrame < this._frameIdx) {
+                this._animations.first;
+                this._runningAnimations.clear();
+                this._params.copy(this._startParams);
+            }
+            else {
+                let anim = this._runningAnimations.first;
+                while (anim) {
+                    let animFrameIdx = targetFrame - anim.startFrame;
+                    anim.startAt(animFrameIdx);
+                    anim = this._runningAnimations.next;
+                }
+            }
+            let animList = this._animations.current;
+            while (animList && animList.first.startFrame <= targetFrame) {
+                let anim = animList.current;
+                while (anim) {
+                    let animFrameIdx = targetFrame - anim.startFrame;
+                    anim.startAt(animFrameIdx);
+                    this._runningAnimations.pushToEnd(anim);
+                    anim = animList.next;
+                }
+                animList = this._animations.next;
+            }
+            this._isPlaying = true;
+            this._transformChanged = false;
+            this._frameIdx = targetFrame;
         }
     }
     AnimationHandler.OBJ_CNT = 0;

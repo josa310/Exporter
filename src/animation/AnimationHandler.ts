@@ -17,7 +17,6 @@ export class AnimationHandler
     protected _compositAnimation: AnimationHandler;
     
     protected _runningAnimations: LinkedList<Animation>;
-    protected _scheduledAnimations: LinkedList<Animation>;
     protected _animations: LinkedList<LinkedList<Animation>>;
 
     protected static OBJ_CNT: number = 0;
@@ -102,7 +101,7 @@ export class AnimationHandler
         this._frameIdx = 0;
         this._isPlaying = true;
         this._transformChanged = false;
-        this._scheduledAnimations = this._animations.first;
+        this._animations.first;
         this._params.copy(this._startParams);
     }
 
@@ -130,19 +129,19 @@ export class AnimationHandler
 
     protected startScheduledAnimations(): void
     {
-        if (!this._scheduledAnimations || this._scheduledAnimations.first.startFrame != this._frameIdx)
+        if (!this._animations || !this._animations.current || this._animations.current.first.startFrame != this._frameIdx)
         {
             return;
         }
 
         do
         {
-            this._scheduledAnimations.current.start();
-            this._runningAnimations.pushToEnd(this._scheduledAnimations.current);
+            this._animations.current.current.start();
+            this._runningAnimations.pushToEnd(this._animations.current.current);
         }
-        while (this._scheduledAnimations.next)
+        while (this._animations.current.next)
 
-        this._scheduledAnimations = this._animations.next;
+        this._animations.next;
     }
 
     protected updateValues(): void
@@ -213,15 +212,50 @@ export class AnimationHandler
 
     }
 
-    protected goToFrame(frame: number): void
+    protected goToFrame(targetFrame: number): void
     {
-        if (frame < 0 || frame > this._frameCnt || frame == this._frameIdx)
+        targetFrame = Math.round(targetFrame);
+        if (targetFrame < 0 || targetFrame > this._frameCnt || targetFrame == this._frameIdx)
         {
             return;
         }
         
-        // Go to last frame: (LastFrame < NewFrame) && (LastFrame > CurrentFrame)
-        // Go to frame: (StartFrame < NewFrame) && (LastFrame > NewFrame)
-       
+        if (targetFrame < this._frameIdx)
+        {
+            this._animations.first;
+            this._runningAnimations.clear();
+            this._params.copy(this._startParams);
+        }
+        else 
+        {
+            let anim: Animation = this._runningAnimations.first;
+            while (anim)
+            {
+                let animFrameIdx: number = targetFrame - anim.startFrame;
+                anim.startAt(animFrameIdx);
+                
+                anim = this._runningAnimations.next;
+            }
+        }
+        
+        let animList: LinkedList<Animation> = this._animations.current;
+        while (animList && animList.first.startFrame <= targetFrame)
+        {
+            let anim: Animation = animList.current;
+            while (anim)
+            {
+                let animFrameIdx: number = targetFrame - anim.startFrame;
+                anim.startAt(animFrameIdx);
+                this._runningAnimations.pushToEnd(anim);
+
+                anim = animList.next;
+            }
+
+            animList = this._animations.next;
+        }
+
+        this._isPlaying = true;
+        this._transformChanged = false;
+        this._frameIdx = targetFrame;
     }
 }

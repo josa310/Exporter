@@ -119,6 +119,17 @@ define(["require", "exports", "./Link"], function (require, exports, Link_1) {
             this._pool = tmp;
             this._length--;
         }
+        copy(l) {
+            this.clear();
+            if (l._length == 0) {
+                return;
+            }
+            let tmp = l._first;
+            while (tmp) {
+                this.pushToEnd(tmp.data);
+                tmp = tmp.next;
+            }
+        }
         createLink(item) {
             let link;
             if (this._pool) {
