@@ -67,6 +67,11 @@ export class Loader
         this._waitFor = 0;
         for (let assetData of data.assets)
         {
+            // TODO: Handle this
+            if (!assetData.w)
+            {
+                continue;
+            }
             let asset: Asset = new Asset(assetData, () => this.onLoad());
             this._assets[assetData.id] = asset;
 
