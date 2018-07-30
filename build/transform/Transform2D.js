@@ -21,7 +21,7 @@ define(["require", "exports", "../transform/Matrix", "./Vector2"], function (req
         init() {
             this._translation = new Vector2_1.Vector2();
             this._rotation = 0;
-            this._scale = 1;
+            this._scale = new Vector2_1.Vector2(1, 1);
             this.update();
         }
         identity() {
@@ -46,10 +46,10 @@ define(["require", "exports", "../transform/Matrix", "./Vector2"], function (req
             this._matrix.data[1][1] = Math.cos(a);
             this.dot(this._matrix, this);
         }
-        scale(s) {
+        scale(sx, sy) {
             this._matrix.identity();
-            this._matrix.data[0][0] = s;
-            this._matrix.data[1][1] = s;
+            this._matrix.data[0][0] = sx;
+            this._matrix.data[1][1] = sy;
             this.dot(this._matrix, this);
         }
         translate(x, y) {
@@ -69,7 +69,8 @@ define(["require", "exports", "../transform/Matrix", "./Vector2"], function (req
             this._translation.y = this.data[1][2];
         }
         updateScale() {
-            this._scale = Math.sqrt(this._data[0][0] * this._data[0][0] + this._data[1][0] * this._data[1][0]);
+            this._scale.x = Math.sign(this._data[0][0]) * Math.sqrt(this._data[0][0] * this._data[0][0] + this._data[0][1] * this._data[0][1]);
+            this._scale.y = Math.sign(this._data[1][1]) * Math.sqrt(this._data[1][0] * this._data[1][0] + this._data[1][1] * this._data[1][1]);
         }
         updateRotation() {
             this._rotation = Math.atan2(this._data[1][0], this._data[1][1]);

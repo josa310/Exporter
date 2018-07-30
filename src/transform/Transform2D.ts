@@ -6,7 +6,7 @@ export class Transform2D extends Matrix
     protected _dirty: boolean;
     protected _matrix: Matrix;
 
-    protected _scale: number;
+    protected _scale: Vector2;
     protected _rotation: number;
     protected _translation: Vector2;
 
@@ -15,7 +15,7 @@ export class Transform2D extends Matrix
         return this._rotation;
     }
 
-    public get scaling(): number
+    public get scaling(): Vector2
     {
         return this._scale;
     }
@@ -39,7 +39,7 @@ export class Transform2D extends Matrix
     {
         this._translation = new Vector2();
         this._rotation = 0;
-        this._scale = 1;
+        this._scale = new Vector2(1,1);
         this.update();
     }
 
@@ -78,12 +78,12 @@ export class Transform2D extends Matrix
         this.dot(this._matrix, this);
     }
 
-    public scale(s: number): void
+    public scale(sx: number, sy: number): void
     {
         this._matrix.identity();
 
-        this._matrix.data[0][0] = s;
-        this._matrix.data[1][1] = s;
+        this._matrix.data[0][0] = sx;
+        this._matrix.data[1][1] = sy;
 
         this.dot(this._matrix, this);
     }
@@ -114,7 +114,8 @@ export class Transform2D extends Matrix
 
     protected updateScale(): void
     {
-        this._scale = Math.sqrt(this._data[0][0] * this._data[0][0] + this._data[1][0] * this._data[1][0]);
+        this._scale.x = Math.sign(this._data[0][0]) * Math.sqrt(this._data[0][0] * this._data[0][0] + this._data[0][1] * this._data[0][1]);
+        this._scale.y = Math.sign(this._data[1][1]) * Math.sqrt(this._data[1][0] * this._data[1][0] + this._data[1][1] * this._data[1][1]);
     }
 
     protected updateRotation(): void

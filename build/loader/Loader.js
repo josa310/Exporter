@@ -36,6 +36,9 @@ define(["require", "exports", "../layer/Layer", "../layer/Asset", "./LayerFactor
         loadAssets(data) {
             this._waitFor = 0;
             for (let assetData of data.assets) {
+                if (!assetData.w) {
+                    continue;
+                }
                 let asset = new Asset_1.Asset(assetData, () => this.onLoad());
                 this._assets[assetData.id] = asset;
                 ++this._waitFor;

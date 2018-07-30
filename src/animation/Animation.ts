@@ -107,20 +107,21 @@ export class Animation
 
     public update(): boolean
     {
+        if (this._frameIdx >= this._frameCnt)
+        {
+            this.stop();
+        }
+        
         if (!this._isPlaying)
         {
             return false;
         }
-
+        
         this._frameIdx++;
         this._alpha = this._frameIdx / this._frameCnt;
 
         this.updateValues();
 
-        if (this._frameIdx >= this._frameCnt)
-        {
-            this.stop();
-        }
         return this._isPlaying;
     }
 

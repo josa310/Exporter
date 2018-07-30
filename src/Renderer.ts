@@ -56,7 +56,7 @@ export class Renderer
 
         this._context.translate(t.position.x, t.position.y);
         this._context.rotate(t.rotation);
-        this._context.scale(t.scaling, t.scaling);
+        this._context.scale(t.scaling.x, t.scaling.y);
 
         if (layer.skew)
         {

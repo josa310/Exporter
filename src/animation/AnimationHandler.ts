@@ -203,7 +203,7 @@ export class AnimationHandler
         transform.translate(this._params.translation.x, this._params.translation.y);
         transform.rotate(this._params.rotation);
         // TODO: alter scale to enable non uniform scaling
-        transform.scale(this._params.scale.x);
+        transform.scale(this._params.scale.x, this._params.scale.y);
         transform.translate(this._params.anchor.x, this._params.anchor.y);
     }
 

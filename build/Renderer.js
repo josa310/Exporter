@@ -32,7 +32,7 @@ define(["require", "exports", "./loader/Loader"], function (require, exports, Lo
             const t = layer.transform;
             this._context.translate(t.position.x, t.position.y);
             this._context.rotate(t.rotation);
-            this._context.scale(t.scaling, t.scaling);
+            this._context.scale(t.scaling.x, t.scaling.y);
             if (layer.skew) {
                 this._context.transform(1, layer.skew / 26 * Math.abs(Math.cos(layer.skewAxis * Math.PI / 180)), layer.skew / 26 * Math.abs(Math.sin(layer.skewAxis * Math.PI / 180)), 1, 0, 0);
             }

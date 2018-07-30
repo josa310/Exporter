@@ -15,62 +15,66 @@ define(["require", "exports", "../layer/Layer", "../animation/AnimationHandler",
         createAnimations(data) {
             this._animHandler = new AnimationHandler_1.AnimationHandler();
             const transitions = data.ks;
-            this.processTranslation(transitions.p);
-            this.processRotation(transitions.r);
-            this.processScale(transitions.s);
-            this.processAnchor(transitions.a);
-            this.processOpacity(transitions.o);
+            this.processScale(transitions.s.k, transitions.s.a);
+            this.processAnchor(transitions.a.k, transitions.a.a);
+            this.processOpacity(transitions.o.k, transitions.o.a);
+            this.processRotation(transitions.r.k, transitions.r.a);
+            this.processTranslation(transitions.p.k, transitions.p.a);
             this._animHandler.updateParams();
         }
-        processTranslation(data) {
-            if (data.a) {
+        processTranslation(data, animated) {
+            if (animated) {
                 this.createAnimation(data, Animation_1.AnimType.TRANSLATION);
-                this._animHandler.params.translation = new Vector2_1.Vector2(data.k[0].s[0], data.k[0].s[1]);
+                this._animHandler.params.translation = new Vector2_1.Vector2(data[0].s[0], data[0].s[1]);
             }
             else {
-                this._animHandler.params.translation = new Vector2_1.Vector2(data.k[0], data.k[1]);
+                this._animHandler.params.translation = new Vector2_1.Vector2(data[0], data[1]);
             }
         }
-        processRotation(data) {
-            if (data.a) {
+        processRotation(data, animated) {
+            if (animated) {
                 this.createAnimation(data, Animation_1.AnimType.ROTATION);
-                this._animHandler.params.rotation = data.k[0].s[0] * MathUtils_1.MathUtils.DEG_TO_RAD;
+                this._animHandler.params.rotation = data[0].s[0] * MathUtils_1.MathUtils.DEG_TO_RAD;
             }
             else {
-                this._animHandler.params.rotation = data.k * MathUtils_1.MathUtils.DEG_TO_RAD;
+                this._animHandler.params.rotation = data * MathUtils_1.MathUtils.DEG_TO_RAD;
             }
         }
-        processScale(data) {
-            if (data.a) {
+        processScale(data, animated) {
+            if (animated) {
                 this.createAnimation(data, Animation_1.AnimType.SCALE);
-                this._animHandler.params.scale = new Vector2_1.Vector2(data.k[0].s[0] / 100, data.k[0].s[1] / 100);
+                this._animHandler.params.scale = new Vector2_1.Vector2(data[0].s[0] / 100, data[0].s[1] / 100);
             }
             else {
-                this._animHandler.params.scale = new Vector2_1.Vector2(data.k[0] / 100, data.k[1] / 100);
+                this._animHandler.params.scale = new Vector2_1.Vector2(data[0] / 100, data[1] / 100);
             }
         }
-        processAnchor(data) {
-            if (data.a) {
+        processAnchor(data, animated) {
+            if (animated) {
                 this.createAnimation(data, Animation_1.AnimType.ANCHOR);
-                this._animHandler.params.anchor = new Vector2_1.Vector2(-data.k[0].s[0], -data.k[0].s[1]);
+                this._animHandler.params.anchor = new Vector2_1.Vector2(-data[0].s[0], -data[0].s[1]);
             }
             else {
-                this._animHandler.params.anchor = new Vector2_1.Vector2(-data.k[0], -data.k[1]);
+                this._animHandler.params.anchor = new Vector2_1.Vector2(-data[0], -data[1]);
             }
         }
-        processOpacity(data) {
-            if (data.a) {
+        processOpacity(data, animated) {
+            if (animated) {
                 this.createAnimation(data, Animation_1.AnimType.OPACITY);
-                this._animHandler.params.opacity = data.k[0].s[0];
+                this._animHandler.params.opacity = data[0].s[0];
             }
             else {
-                this._animHandler.params.opacity = data.k / 100;
+                this._animHandler.params.opacity = data / 100;
             }
         }
         createAnimation(data, type) {
-            let cnt = data.k.length;
+            let cnt = data.length;
             for (let idx = 0; idx < cnt - 1; idx++) {
-                let animation = new Animation_1.Animation(data.k[idx].t, data.k[idx + 1].t, data.k[idx].s, data.k[idx].e, type);
+                let startFrame = data[idx].t;
+                let endFrame = data[idx + 1].t;
+                let startValues = data[idx].s;
+                let endValues = data[idx].e ? data[idx].e : startValues;
+                let animation = new Animation_1.Animation(startFrame, endFrame, startValues, endValues, type);
                 this._animHandler.add(animation);
             }
         }
