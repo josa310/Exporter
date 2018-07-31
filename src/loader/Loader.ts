@@ -70,9 +70,10 @@ export class Loader
         this._waitFor = 0;
         for (let assetData of data.assets)
         {
-            // TODO: Handle this
+            // TODO: subcomposits
             if (!assetData.w)
             {
+                // this.loadPreComp(assetData);
                 continue;
             }
             let asset: Asset = new Asset(assetData, () => this.onLoad());
