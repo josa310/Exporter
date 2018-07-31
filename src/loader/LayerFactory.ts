@@ -13,16 +13,16 @@ export class LayerFactory
     {
         this.createAnimations(data);
 
-        let id: number = data.ind;
-        let parentId: number = data.parent;
+        let id: string = data.ind;
+        let parentId: string = data.parent;
         let asset: Asset = assets[data.refId];
 
         return new Layer(id, parentId, asset, this._animHandler);  
     }
 
-    public createEmpty(): Layer
+    public createEmpty(id: string): Layer
     {
-        return new Layer(-1, null, null, new AnimationHandler());
+        return new Layer(id, null, null, new AnimationHandler());
     }
 
     protected createAnimations(data: any): void

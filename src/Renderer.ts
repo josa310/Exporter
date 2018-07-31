@@ -1,3 +1,4 @@
+import { LinkedList } from './list/LinkedList';
 import { Loader } from './loader/Loader';
 import { Layer } from "./layer/Layer";
 import { Transform2D } from "./transform/Transform2D";
@@ -14,7 +15,7 @@ export class Renderer
         this._context = this._canvas.getContext("2d");
     }
 
-    public render(layers: Layer[], root: Layer): void
+    public render(layers: LinkedList<Layer>, root: Layer): void
     {
         this._canvas.width = Loader.canvasWidth;
         this._canvas.height = Loader.canvasHeight;
@@ -24,11 +25,11 @@ export class Renderer
         this.clear();
         
         let animating: boolean = false;
-        // Drawing the images in reverse order
-        for (let idx: number = layers.length - 1; idx >= 0; idx--)       
+        let layer: Layer = layers.first;
+
+        while (layer)
         {
             this._context.save();
-            let layer: Layer = layers[idx];
 
             animating = (layer.animating || animating);
             this.setParams(layer);
@@ -39,13 +40,17 @@ export class Renderer
             }
             
             this._context.restore();
+
+            layer = layers.next;
         }
 
         if (!animating)
         {
-            for (let layer of layers)
+            layer = layers.first;
+            while (layer)
             {
                 layer.startAnim();
+                layer = layers.next;
             }
         }
     }

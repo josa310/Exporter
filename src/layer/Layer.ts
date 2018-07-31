@@ -1,11 +1,8 @@
 import { Asset } from './Asset';
+import { LinkedList } from '../list/LinkedList';
 import { Transform2D } from '../transform/Transform2D';
-import { Vector2 } from '../transform/Vector2';
-import { MathUtils } from '../transform/MathUtils';
-import { Animation, AnimType, Transitions } from '../animation/Animation';
 import { AnimationData } from '../animation/AnimationData';
 import { AnimationHandler } from '../animation/AnimationHandler';
-import { LinkedList } from '../list/LinkedList';
 
 export class Layer
 {
@@ -15,9 +12,9 @@ export class Layer
     protected _animation: AnimationHandler;
     protected _globalTransform: Transform2D;
 
-    protected _id: number;
+    protected _id: string;
     protected _parent: Layer;
-    protected _parentId: number;
+    protected _parentId: string;
     protected _animatig: boolean;
     protected _children: LinkedList<Layer>;
 
@@ -31,9 +28,14 @@ export class Layer
         return this._children;
     }
 
-    public get parentId(): number
+    public get parentId(): string
     {
         return this._parentId;
+    }
+
+    public get id(): string
+    {
+        return this._id;
     }
 
     public get parent(): Layer
@@ -59,7 +61,7 @@ export class Layer
     public skew: number;
     public skewAxis: number;
 
-    constructor(id: number, parentId: number, asset: Asset, animation: AnimationHandler)
+    constructor(id: string, parentId: string, asset: Asset, animation: AnimationHandler)
     {
         this._parent = null;
         this._children = null;

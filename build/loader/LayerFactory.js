@@ -9,8 +9,8 @@ define(["require", "exports", "../layer/Layer", "../animation/AnimationHandler",
             let asset = assets[data.refId];
             return new Layer_1.Layer(id, parentId, asset, this._animHandler);
         }
-        createEmpty() {
-            return new Layer_1.Layer(-1, null, null, new AnimationHandler_1.AnimationHandler());
+        createEmpty(id) {
+            return new Layer_1.Layer(id, null, null, new AnimationHandler_1.AnimationHandler());
         }
         createAnimations(data) {
             this._animHandler = new AnimationHandler_1.AnimationHandler();

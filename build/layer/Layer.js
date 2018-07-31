@@ -1,4 +1,4 @@
-define(["require", "exports", "../transform/Transform2D", "../list/LinkedList"], function (require, exports, Transform2D_1, LinkedList_1) {
+define(["require", "exports", "../list/LinkedList", "../transform/Transform2D"], function (require, exports, LinkedList_1, Transform2D_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Layer {
@@ -20,6 +20,9 @@ define(["require", "exports", "../transform/Transform2D", "../list/LinkedList"],
         }
         get parentId() {
             return this._parentId;
+        }
+        get id() {
+            return this._id;
         }
         get parent() {
             return this._parent;

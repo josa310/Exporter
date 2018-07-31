@@ -12,19 +12,22 @@ define(["require", "exports", "./loader/Loader"], function (require, exports, Lo
             root.update();
             this.clear();
             let animating = false;
-            for (let idx = layers.length - 1; idx >= 0; idx--) {
+            let layer = layers.first;
+            while (layer) {
                 this._context.save();
-                let layer = layers[idx];
                 animating = (layer.animating || animating);
                 this.setParams(layer);
                 if (layer.asset) {
                     this._context.drawImage(layer.asset.img, 0, 0);
                 }
                 this._context.restore();
+                layer = layers.next;
             }
             if (!animating) {
-                for (let layer of layers) {
+                layer = layers.first;
+                while (layer) {
                     layer.startAnim();
+                    layer = layers.next;
                 }
             }
         }

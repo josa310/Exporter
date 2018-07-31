@@ -1,3 +1,4 @@
+import { LinkedList } from './list/LinkedList';
 import { Loader } from './loader/Loader';
 import { Layer } from './layer/Layer';
 import { Renderer } from './Renderer';
@@ -6,7 +7,7 @@ import { Renderer } from './Renderer';
 export class Script
 {
     protected _root: Layer;
-    protected _layers: Layer[];
+    protected _layers: LinkedList<Layer>;
 
     protected _loader: Loader;
     protected _renderer: Renderer;
@@ -15,7 +16,7 @@ export class Script
     {
         this._renderer = new Renderer();
 
-        this._layers = new Array<Layer>();
+        this._layers = new LinkedList<Layer>();
         this._loader = new Loader(path, this._layers, () => this.onLoad());
     }
 

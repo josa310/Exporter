@@ -1,3 +1,4 @@
+import { LinkedList } from './../list/LinkedList';
 import { Layer } from "../layer/Layer";
 import { Asset } from "../layer/Asset";
 import { LayerFactory } from "./LayerFactory";
@@ -11,8 +12,9 @@ export class Loader
     protected _path: string;
     protected _cb: () => void;
     protected _waitFor: number;
-    protected _layers: Layer[];
     protected _rootLayer: Layer;
+    protected _layers: LinkedList<Layer>;
+    protected _tmpLayers: LinkedList<Layer>;
     protected _layerFactory: LayerFactory;
     protected _httpRequest: XMLHttpRequest;
     protected _assets: {[key: string]: Asset};
@@ -22,14 +24,15 @@ export class Loader
         return this._rootLayer;
     }
 
-    constructor(path: string, layers: Layer[], cb: () => void)
+    constructor(path: string, layers: LinkedList<Layer>, cb: () => void)
     {
         this._cb = cb;
         this._assets = {};
         this._path = path;
         this._layers = layers;
         this._layerFactory = new LayerFactory();
-        
+        this._tmpLayers = new LinkedList<Layer>();
+
         this.loadJSON();
     }
     
@@ -83,23 +86,46 @@ export class Loader
     {
         for (let ld of data.layers)
         {
-            this._layers.push(this._layerFactory.createLayer(ld, this._assets));
+            let layer : Layer = this._layerFactory.createLayer(ld, this._assets);
+            this._layers.pushToStart(layer);
+            this._tmpLayers.pushToStart(layer);
         }
     }
 
     protected setParents(root: Layer)
     {
-        for (let layer of this._layers)
+        let layer: Layer = this._layers.first;
+
+        while (layer)
         {
             if (layer.parentId)
             {
-                this._layers[layer.parentId - 1].addChild(layer);
+                this.getLayerById(layer.parentId).addChild(layer);
             }
             else
             {
                 root.addChild(layer);
             }
+
+            layer = this._layers.next;
         }
+    }
+
+    protected getLayerById(id: string): Layer
+    {
+        let layer: Layer = this._tmpLayers.first;
+
+        while (layer)
+        {
+            if (layer.id == id)
+            {
+                return layer;
+            }
+
+            layer = this._tmpLayers.next;
+        }
+
+        return layer;
     }
 
     protected onLoad(): void
@@ -107,7 +133,7 @@ export class Loader
         this._waitFor--;
         if (this._waitFor == 0)
         {
-            let root: Layer = this._layerFactory.createEmpty();
+            let root: Layer = this._layerFactory.createEmpty("root");
             this.setParents(root);
             this._rootLayer = root;
             this._cb();
