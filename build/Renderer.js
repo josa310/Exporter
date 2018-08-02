@@ -1,4 +1,4 @@
-define(["require", "exports", "./loader/Loader"], function (require, exports, Loader_1) {
+define(["require", "exports", "./layer/ResourceHandler"], function (require, exports, ResourceHandler_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Renderer {
@@ -6,9 +6,11 @@ define(["require", "exports", "./loader/Loader"], function (require, exports, Lo
             this._canvas = document.getElementById("canvas");
             this._context = this._canvas.getContext("2d");
         }
-        render(layers, root) {
-            this._canvas.width = Loader_1.Loader.canvasWidth;
-            this._canvas.height = Loader_1.Loader.canvasHeight;
+        render() {
+            this._canvas.width = ResourceHandler_1.ResourceHandler.CANVAS_WIDTH;
+            this._canvas.height = ResourceHandler_1.ResourceHandler.CANVAS_HEIGHT;
+            let root = ResourceHandler_1.ResourceHandler.instance.root;
+            let layers = ResourceHandler_1.ResourceHandler.instance.layers;
             root.update();
             this.clear();
             let animating = false;
@@ -17,7 +19,7 @@ define(["require", "exports", "./loader/Loader"], function (require, exports, Lo
                 this._context.save();
                 animating = (layer.animating || animating);
                 this.setParams(layer);
-                if (layer.asset) {
+                if (layer.asset && !layer.asset.isPrecomp) {
                     this._context.drawImage(layer.asset.img, 0, 0);
                 }
                 this._context.restore();

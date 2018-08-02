@@ -2,10 +2,18 @@ define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Asset {
+        get isPrecomp() {
+            return this._isPreComp;
+        }
         get img() {
             return this._img;
         }
-        constructor(data, cb) {
+        constructor(data, cb, layers = null) {
+            this._isPreComp = layers != null;
+            if (this._isPreComp) {
+                this._layers = layers;
+                return;
+            }
             this._id = data.id;
             this._src = data.u + data.p;
             this._width = data.w;

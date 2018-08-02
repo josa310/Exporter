@@ -125,6 +125,11 @@ export class Animation
         return this._isPlaying;
     }
 
+    public duplicate(): Animation
+    {
+        return new Animation(this._startFrame, this.endFrame, this._startValues, this._endValues, this._type);
+    }
+
     protected updateValues(): void
     {
         for (let idx: number = 0; idx < this._startValues.length; idx++)

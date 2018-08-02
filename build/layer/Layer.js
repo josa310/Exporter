@@ -71,6 +71,24 @@ define(["require", "exports", "../list/LinkedList", "../transform/Transform2D"],
                 child = this._children.next;
             }
         }
+        static copy(layer, copyChildren = true) {
+            let retVal = new Layer(layer._id, layer._parentId, layer._asset, layer._animation.duplicate());
+            return retVal;
+        }
+        printChilds(indent = 0) {
+            let ind = "";
+            for (let idx = 0; idx < indent; idx++) {
+                ind += "|\t";
+            }
+            console.log(ind + this._id);
+            if (this._children) {
+                this._children.first;
+                while (this._children.current) {
+                    this._children.current.printChilds(indent + 1);
+                    this._children.next;
+                }
+            }
+        }
     }
     Layer.FPS = 1000 / 30;
     exports.Layer = Layer;

@@ -1,3 +1,4 @@
+import { ResourceHandler } from './layer/ResourceHandler';
 import { LinkedList } from './list/LinkedList';
 import { Loader } from './loader/Loader';
 import { Layer } from "./layer/Layer";
@@ -15,10 +16,13 @@ export class Renderer
         this._context = this._canvas.getContext("2d");
     }
 
-    public render(layers: LinkedList<Layer>, root: Layer): void
+    public render(): void
     {
-        this._canvas.width = Loader.canvasWidth;
-        this._canvas.height = Loader.canvasHeight;
+        this._canvas.width = ResourceHandler.CANVAS_WIDTH;
+        this._canvas.height = ResourceHandler.CANVAS_HEIGHT;
+
+        let root = ResourceHandler.instance.root
+        let layers = ResourceHandler.instance.layers;
 
         root.update();
         
@@ -34,7 +38,7 @@ export class Renderer
             animating = (layer.animating || animating);
             this.setParams(layer);
 
-            if (layer.asset)
+            if (layer.asset && !layer.asset.isPrecomp)
             {
                 this._context.drawImage(layer.asset.img, 0, 0);
             }

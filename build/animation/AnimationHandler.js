@@ -121,6 +121,20 @@ define(["require", "exports", "./Animation", "./Animation", "../list/LinkedList"
                 animation = this._runningAnimations.next;
             }
         }
+        duplicate() {
+            let animHandler = new AnimationHandler();
+            let animations = this._animations.first;
+            while (animations) {
+                let animation = animations.first;
+                while (animation) {
+                    animHandler.add(animation.duplicate());
+                    animation = animations.next;
+                }
+                animations = this._animations.next;
+            }
+            animHandler.params = this._params;
+            return animHandler;
+        }
         updateTransform() {
             let transform = this._params.transform;
             transform.identity();

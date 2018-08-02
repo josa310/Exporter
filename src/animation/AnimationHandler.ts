@@ -195,6 +195,28 @@ export class AnimationHandler
             animation = this._runningAnimations.next;
         }
     }
+
+    public duplicate(): AnimationHandler
+    {
+        let animHandler: AnimationHandler = new AnimationHandler();
+
+        let animations: LinkedList<Animation> = this._animations.first;
+        while (animations)
+        {
+            let animation: Animation = animations.first;
+            while (animation)
+            {
+                animHandler.add(animation.duplicate());
+                animation = animations.next;
+            }
+
+            animations = this._animations.next;
+        }
+
+        animHandler.params = this._params;
+
+        return animHandler;
+    }
     
     public updateTransform(): void
     {

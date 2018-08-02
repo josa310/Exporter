@@ -1,8 +1,8 @@
-define(["require", "exports"], function (require, exports) {
+define(["require", "exports", "./../list/LinkedList"], function (require, exports, LinkedList_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ResourceHandler {
-        get instance() {
+        static get instance() {
             if (!ResourceHandler._instance) {
                 ResourceHandler._instance = new ResourceHandler();
             }
@@ -27,6 +27,8 @@ define(["require", "exports"], function (require, exports) {
             this._assets = value;
         }
         constructor() {
+            this._assets = {};
+            this._layers = new LinkedList_1.LinkedList();
         }
     }
     exports.ResourceHandler = ResourceHandler;

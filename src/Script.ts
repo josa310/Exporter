@@ -6,9 +6,6 @@ import { Renderer } from './Renderer';
 // TODO: Write comments above the lines they are describing
 export class Script
 {
-    protected _root: Layer;
-    protected _layers: LinkedList<Layer>;
-
     protected _loader: Loader;
     protected _renderer: Renderer;
 
@@ -16,24 +13,21 @@ export class Script
     {
         this._renderer = new Renderer();
 
-        this._layers = new LinkedList<Layer>();
-        this._loader = new Loader(path, this._layers, () => this.onLoad());
+        this._loader = new Loader(path, () => this.onLoad());
     }
 
     protected onLoad(): void
     {
-        this._root = this._loader.rootLayer;
         this.start();
     }
     
-    protected _timerId: number;
     public start(): void
     {
-        this._timerId = setInterval(() => this.update(), Layer.FPS);
+        setInterval(() => this.update(), Layer.FPS);
     }
     
     public update(): void
     {
-        this._renderer.render(this._layers, this._root);
+        this._renderer.render();
     }
 }

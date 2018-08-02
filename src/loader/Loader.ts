@@ -1,35 +1,22 @@
-import { LinkedList } from './../list/LinkedList';
 import { Layer } from "../layer/Layer";
 import { Asset } from "../layer/Asset";
 import { LayerFactory } from "./LayerFactory";
+import { LinkedList } from './../list/LinkedList';
+import { ResourceHandler } from './../layer/ResourceHandler';
 
 export class Loader
 {
-    public static canvasWidth: number;
-    public static canvasHeight: number;
-
-    protected _data: any;
     protected _path: string;
     protected _cb: () => void;
     protected _waitFor: number;
-    protected _rootLayer: Layer;
-    protected _layers: LinkedList<Layer>;
     protected _tmpLayers: LinkedList<Layer>;
     protected _layerFactory: LayerFactory;
     protected _httpRequest: XMLHttpRequest;
-    protected _assets: {[key: string]: Asset};
 
-    public get rootLayer(): Layer
-    {
-        return this._rootLayer;
-    }
-
-    constructor(path: string, layers: LinkedList<Layer>, cb: () => void)
+    constructor(path: string, cb: () => void)
     {
         this._cb = cb;
-        this._assets = {};
         this._path = path;
-        this._layers = layers;
         this._layerFactory = new LayerFactory();
         this._tmpLayers = new LinkedList<Layer>();
 
@@ -58,44 +45,79 @@ export class Loader
     
     protected load(data: any): void
     {
-        Loader.canvasHeight = data.h;
-        Loader.canvasWidth = data.w;
+        ResourceHandler.CANVAS_WIDTH = data.w;
+        ResourceHandler.CANVAS_HEIGHT = data.h;
+
         Layer.FPS = 1000 / data.fr;
+
         this.loadAssets(data);
-        this.loadLayers(data);
+        
+        let layers: LinkedList<Layer> = new LinkedList<Layer>();
+        this.loadLayers(data.layers, layers);
+        
+        let root: Layer = this._layerFactory.createEmpty("root");
+        this.setParents(root, layers);
+        
+        
+        // let cpLayers: LinkedList<Layer> = new LinkedList<Layer>();
+        // layers.first;
+        // while (layers.current)
+        // {
+        //     cpLayers.pushToEnd(Layer.copy(layers.current));
+        //     layers.next;
+        // }
+        // let cpRoot: Layer = this._layerFactory.createEmpty("root");
+        
+        // this.setParents(cpRoot, cpLayers);
+
+        let rh: ResourceHandler = ResourceHandler.instance;
+        rh.root = root;
+        rh.layers = layers;
+
+        // rh.root.printChilds();
     }
     
     protected loadAssets(data: any): void
     {
+        let assets: {[key: string]: Asset} = ResourceHandler.instance.assets;
         this._waitFor = 0;
         for (let assetData of data.assets)
         {
-            // TODO: subcomposits
-            if (!assetData.w)
-            {
-                // this.loadPreComp(assetData);
-                continue;
-            }
-            let asset: Asset = new Asset(assetData, () => this.onLoad());
-            this._assets[assetData.id] = asset;
+            let asset: Asset;
 
-            ++this._waitFor;
+            if (assetData.layers)
+            {
+                let layers: LinkedList<Layer> = new LinkedList<Layer>();
+                this.loadLayers(data.layers, layers);
+                asset = new Asset(null, null, layers);
+            }
+            else
+            {
+                asset = new Asset(assetData, () => this.onLoad());
+                ++this._waitFor;
+            }
+
+            assets[assetData.id] = asset;
         }
     }
 
-    protected loadLayers(data: any): void
+    protected loadLayers(data: any, layers: LinkedList<Layer>): void
     {
-        for (let ld of data.layers)
+        layers.clear();
+        let assets: {[key: string]: Asset} = ResourceHandler.instance.assets;
+
+        for (let ld of data)
         {
-            let layer : Layer = this._layerFactory.createLayer(ld, this._assets);
-            this._layers.pushToStart(layer);
+            let layer : Layer = this._layerFactory.createLayer(ld, assets);
+            layers.pushToStart(layer);
             this._tmpLayers.pushToStart(layer);
         }
     }
 
-    protected setParents(root: Layer)
+    protected setParents(root: Layer, layers: LinkedList<Layer>): void
     {
-        let layer: Layer = this._layers.first;
+        this._tmpLayers.copy(layers);
+        let layer: Layer = layers.first;
 
         while (layer)
         {
@@ -108,8 +130,10 @@ export class Loader
                 root.addChild(layer);
             }
 
-            layer = this._layers.next;
+            layer = layers.next;
         }
+
+        this._tmpLayers.clear();
     }
 
     protected getLayerById(id: string): Layer
@@ -134,9 +158,6 @@ export class Loader
         this._waitFor--;
         if (this._waitFor == 0)
         {
-            let root: Layer = this._layerFactory.createEmpty("root");
-            this.setParents(root);
-            this._rootLayer = root;
             this._cb();
         }
     }

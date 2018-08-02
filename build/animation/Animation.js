@@ -79,6 +79,9 @@ define(["require", "exports"], function (require, exports) {
             this.updateValues();
             return this._isPlaying;
         }
+        duplicate() {
+            return new Animation(this._startFrame, this.endFrame, this._startValues, this._endValues, this._type);
+        }
         updateValues() {
             for (let idx = 0; idx < this._startValues.length; idx++) {
                 this._currentValues[idx] = this.lerp(this._startValues[idx], this._endValues[idx]);

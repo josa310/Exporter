@@ -126,4 +126,41 @@ export class Layer
             child = this._children.next;
         }
     }
+
+    public static copy(layer: Layer, copyChildren: boolean = true): Layer
+    {
+        let retVal: Layer = new Layer(layer._id, layer._parentId, layer._asset, layer._animation.duplicate());
+
+        
+        // if (copyChildren && layer._children)
+        // {
+        //     let child = layer._children.first;
+        //     while (child)
+        //     {
+        //         retVal.addChild(Layer.copy(child));
+        //         child = layer._children.next;
+        //     }
+        // }
+
+        return retVal;
+    }
+
+    public printChilds(indent: number = 0): void
+    {
+        let ind: string = "";
+        for (let idx: number = 0; idx < indent; idx++)
+        {
+            ind += "|\t";
+        }
+        console.log(ind + this._id);
+        if (this._children)
+        {
+            this._children.first;
+            while (this._children.current)
+            {
+                this._children.current.printChilds(indent + 1);
+                this._children.next;
+            }
+        }
+    }
 }

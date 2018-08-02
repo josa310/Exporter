@@ -13,7 +13,7 @@ export class ResourceHandler
     protected _layers: LinkedList<Layer>;
     protected _assets: {[key: string]: Asset};
 
-    public get instance(): ResourceHandler
+    public static get instance(): ResourceHandler
     {
         if (!ResourceHandler._instance)
         {
@@ -55,6 +55,7 @@ export class ResourceHandler
 
     protected constructor()
     {
-
+        this._assets = {};
+        this._layers = new LinkedList<Layer>();
     }
 }

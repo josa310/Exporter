@@ -1,15 +1,10 @@
-define(["require", "exports", "./../list/LinkedList", "../layer/Layer", "../layer/Asset", "./LayerFactory"], function (require, exports, LinkedList_1, Layer_1, Asset_1, LayerFactory_1) {
+define(["require", "exports", "../layer/Layer", "../layer/Asset", "./LayerFactory", "./../list/LinkedList", "./../layer/ResourceHandler"], function (require, exports, Layer_1, Asset_1, LayerFactory_1, LinkedList_1, ResourceHandler_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Loader {
-        get rootLayer() {
-            return this._rootLayer;
-        }
-        constructor(path, layers, cb) {
+        constructor(path, cb) {
             this._cb = cb;
-            this._assets = {};
             this._path = path;
-            this._layers = layers;
             this._layerFactory = new LayerFactory_1.LayerFactory();
             this._tmpLayers = new LinkedList_1.LinkedList();
             this.loadJSON();
@@ -28,32 +23,47 @@ define(["require", "exports", "./../list/LinkedList", "../layer/Layer", "../laye
             }
         }
         load(data) {
-            Loader.canvasHeight = data.h;
-            Loader.canvasWidth = data.w;
+            ResourceHandler_1.ResourceHandler.CANVAS_WIDTH = data.w;
+            ResourceHandler_1.ResourceHandler.CANVAS_HEIGHT = data.h;
             Layer_1.Layer.FPS = 1000 / data.fr;
             this.loadAssets(data);
-            this.loadLayers(data);
+            let layers = new LinkedList_1.LinkedList();
+            this.loadLayers(data.layers, layers);
+            let root = this._layerFactory.createEmpty("root");
+            this.setParents(root, layers);
+            let rh = ResourceHandler_1.ResourceHandler.instance;
+            rh.root = root;
+            rh.layers = layers;
         }
         loadAssets(data) {
+            let assets = ResourceHandler_1.ResourceHandler.instance.assets;
             this._waitFor = 0;
             for (let assetData of data.assets) {
-                if (!assetData.w) {
-                    continue;
+                let asset;
+                if (assetData.layers) {
+                    let layers = new LinkedList_1.LinkedList();
+                    this.loadLayers(data.layers, layers);
+                    asset = new Asset_1.Asset(null, null, layers);
                 }
-                let asset = new Asset_1.Asset(assetData, () => this.onLoad());
-                this._assets[assetData.id] = asset;
-                ++this._waitFor;
+                else {
+                    asset = new Asset_1.Asset(assetData, () => this.onLoad());
+                    ++this._waitFor;
+                }
+                assets[assetData.id] = asset;
             }
         }
-        loadLayers(data) {
-            for (let ld of data.layers) {
-                let layer = this._layerFactory.createLayer(ld, this._assets);
-                this._layers.pushToStart(layer);
+        loadLayers(data, layers) {
+            layers.clear();
+            let assets = ResourceHandler_1.ResourceHandler.instance.assets;
+            for (let ld of data) {
+                let layer = this._layerFactory.createLayer(ld, assets);
+                layers.pushToStart(layer);
                 this._tmpLayers.pushToStart(layer);
             }
         }
-        setParents(root) {
-            let layer = this._layers.first;
+        setParents(root, layers) {
+            this._tmpLayers.copy(layers);
+            let layer = layers.first;
             while (layer) {
                 if (layer.parentId) {
                     this.getLayerById(layer.parentId).addChild(layer);
@@ -61,8 +71,9 @@ define(["require", "exports", "./../list/LinkedList", "../layer/Layer", "../laye
                 else {
                     root.addChild(layer);
                 }
-                layer = this._layers.next;
+                layer = layers.next;
             }
+            this._tmpLayers.clear();
         }
         getLayerById(id) {
             let layer = this._tmpLayers.first;
@@ -77,9 +88,6 @@ define(["require", "exports", "./../list/LinkedList", "../layer/Layer", "../laye
         onLoad() {
             this._waitFor--;
             if (this._waitFor == 0) {
-                let root = this._layerFactory.createEmpty("root");
-                this.setParents(root);
-                this._rootLayer = root;
                 this._cb();
             }
         }
