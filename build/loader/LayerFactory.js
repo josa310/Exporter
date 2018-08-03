@@ -1,4 +1,4 @@
-define(["require", "exports", "../layer/Layer", "../animation/AnimationHandler", "../animation/Animation", "../transform/Vector2", "../transform/MathUtils"], function (require, exports, Layer_1, AnimationHandler_1, Animation_1, Vector2_1, MathUtils_1) {
+define(["require", "exports", "../layer/Layer", "../transform/Vector2", "../transform/MathUtils", "../animation/Animation", "../animation/AnimationHandler"], function (require, exports, Layer_1, Vector2_1, MathUtils_1, Animation_1, AnimationHandler_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class LayerFactory {
@@ -7,6 +7,9 @@ define(["require", "exports", "../layer/Layer", "../animation/AnimationHandler",
             let id = data.ind;
             let parentId = data.parent;
             let asset = assets[data.refId];
+            if (asset && asset.isPrecomp) {
+                asset = asset.duplicate();
+            }
             return new Layer_1.Layer(id, parentId, asset, this._animHandler);
         }
         createEmpty(id) {

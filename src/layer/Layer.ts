@@ -130,18 +130,7 @@ export class Layer
     public static copy(layer: Layer, copyChildren: boolean = true): Layer
     {
         let retVal: Layer = new Layer(layer._id, layer._parentId, layer._asset, layer._animation.duplicate());
-
         
-        // if (copyChildren && layer._children)
-        // {
-        //     let child = layer._children.first;
-        //     while (child)
-        //     {
-        //         retVal.addChild(Layer.copy(child));
-        //         child = layer._children.next;
-        //     }
-        // }
-
         return retVal;
     }
 
@@ -152,7 +141,9 @@ export class Layer
         {
             ind += "|\t";
         }
+
         console.log(ind + this._id);
+        
         if (this._children)
         {
             this._children.first;

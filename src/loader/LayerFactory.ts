@@ -1,9 +1,9 @@
 import { Layer } from "../layer/Layer";
 import { Asset } from "../layer/Asset";
-import { AnimationHandler } from "../animation/AnimationHandler";
-import { Animation, AnimType } from "../animation/Animation";
 import { Vector2 } from "../transform/Vector2";
 import { MathUtils } from "../transform/MathUtils";
+import { Animation, AnimType } from "../animation/Animation";
+import { AnimationHandler } from "../animation/AnimationHandler";
 
 export class LayerFactory
 {
@@ -16,6 +16,11 @@ export class LayerFactory
         let id: string = data.ind;
         let parentId: string = data.parent;
         let asset: Asset = assets[data.refId];
+
+        if (asset && asset.isPrecomp)
+        {
+            asset = asset.duplicate();
+        }
 
         return new Layer(id, parentId, asset, this._animHandler);  
     }

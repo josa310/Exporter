@@ -54,29 +54,39 @@ export class Loader
         
         let layers: LinkedList<Layer> = new LinkedList<Layer>();
         this.loadLayers(data.layers, layers);
-        
+
+        this.setPrecomposits(layers);
+
         let root: Layer = this._layerFactory.createEmpty("root");
         this.setParents(root, layers);
         
-        
-        // let cpLayers: LinkedList<Layer> = new LinkedList<Layer>();
-        // layers.first;
-        // while (layers.current)
-        // {
-        //     cpLayers.pushToEnd(Layer.copy(layers.current));
-        //     layers.next;
-        // }
-        // let cpRoot: Layer = this._layerFactory.createEmpty("root");
-        
-        // this.setParents(cpRoot, cpLayers);
-
         let rh: ResourceHandler = ResourceHandler.instance;
         rh.root = root;
         rh.layers = layers;
-
-        // rh.root.printChilds();
     }
     
+    protected setPrecomposits(layers: LinkedList<Layer>): void
+    {
+        let layer: Layer = layers.first;
+        while (layer)
+        {
+            if (layer.asset && layer.asset.isPrecomp)
+            {
+                let assetLayers: LinkedList<Layer> = layer.asset.layers;
+                let al: Layer = assetLayers.first;
+                while (al)
+                {
+                    layers.linkBefore(al);
+                    
+                    al = assetLayers.next;
+                }
+                // this.setParents(layer, assetLayers);
+            }
+
+            layer = layers.next;
+        }
+    }
+
     protected loadAssets(data: any): void
     {
         let assets: {[key: string]: Asset} = ResourceHandler.instance.assets;

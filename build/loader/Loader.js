@@ -29,11 +29,26 @@ define(["require", "exports", "../layer/Layer", "../layer/Asset", "./LayerFactor
             this.loadAssets(data);
             let layers = new LinkedList_1.LinkedList();
             this.loadLayers(data.layers, layers);
+            this.setPrecomposits(layers);
             let root = this._layerFactory.createEmpty("root");
             this.setParents(root, layers);
             let rh = ResourceHandler_1.ResourceHandler.instance;
             rh.root = root;
             rh.layers = layers;
+        }
+        setPrecomposits(layers) {
+            let layer = layers.first;
+            while (layer) {
+                if (layer.asset && layer.asset.isPrecomp) {
+                    let assetLayers = layer.asset.layers;
+                    let al = assetLayers.first;
+                    while (al) {
+                        layers.linkBefore(al);
+                        al = assetLayers.next;
+                    }
+                }
+                layer = layers.next;
+            }
         }
         loadAssets(data) {
             let assets = ResourceHandler_1.ResourceHandler.instance.assets;

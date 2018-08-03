@@ -21,6 +21,11 @@ export class Asset
         return this._img;
     }
 
+    public get layers(): LinkedList<Layer>
+    {
+        return this._layers;
+    }
+
     constructor(data: any, cb: () => void, layers: LinkedList<Layer> = null)
     {
         this._isPreComp = layers != null;
@@ -38,5 +43,25 @@ export class Asset
         this._img = document.createElement("img");
         this._img.src = data.u + data.p;
         this._img.onload = cb;
+    }
+
+    public duplicate(): Asset
+    {
+        if (!this._isPreComp)
+        {
+            return null;
+        }
+
+        let retVal: Asset = new Asset(null, null, new LinkedList<Layer>());
+
+        this._layers.first;
+        while (this._layers.current)
+        {
+            retVal._layers.pushToEnd(Layer.copy(this._layers.current));
+
+            this._layers.next;
+        }
+
+        return retVal;
     }
 }
